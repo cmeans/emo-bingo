@@ -27,7 +27,7 @@
         </div>
       </div>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <div class="d-flex justify-center">
         <amplify-authenticator v-if="authState !== 'signedin'">
           <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
@@ -38,7 +38,7 @@
         <hr/>
         <EmoImages/>
       </amplify-authenticator>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
