@@ -5,7 +5,7 @@
         v-for="n in 9"
         :key="n"
         class="d-flex child-flex"
-        cols="4"
+        cols="2"
       >
         <v-img
           :src="`https://picsum.photos/500/300?image=${n * 5 + 10}`"
@@ -25,6 +25,9 @@
               ></v-progress-circular>
             </v-row>
           </template>
+          <v-btn fab dark medium color="primary" right top style="margin-right:-10px">
+            <v-icon dark>Del</v-icon>
+          </v-btn>
         </v-img>
       </v-col>
     </v-row>

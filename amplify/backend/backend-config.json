@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "emobingo6769acca6769acca": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}
