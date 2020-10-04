@@ -2,14 +2,20 @@
   <v-form ref="form" v-model="isFormValid">
     <v-container>
       <v-row>
-        <v-col class="col-md-12 col-lg-3">
+        <v-col
+          cols="12"
+          md="4"
+        >
           <v-text-field
             :rules="[v => !!v || 'Item is required']"
             v-model="name"
             label="Attempted Emotion"
           />
         </v-col>
-        <v-col class="col-md-12 col-lg-3">
+        <v-col
+          cols="12"
+          md="4"
+        >
           <v-file-input
             :rules="[v => !!v || 'Item is required']"
             v-model="image"
@@ -18,7 +24,10 @@
             capture="user"
           />
         </v-col>
-        <v-col class="col-md-12 col-lg-3">
+        <v-col
+          cols="12"
+          md="4"
+        >
           <v-btn
             :disabled="!isFormValid"
             v-on:click="saveEntry">
