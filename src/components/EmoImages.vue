@@ -13,6 +13,7 @@
           aspect-ratio="1"
           class="grey lighten-2"
         >
+          <v-badge></v-badge>
           <template v-slot:placeholder>
             <v-row
               class="fill-height ma-0"
