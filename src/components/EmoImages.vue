@@ -12,7 +12,6 @@
           icon="mdi-lock"
           overlap
         >
-          <div>{{ entry.name }}</div>
           <v-img
             :src="entry.image"
             :lazy-src="entry.image"
@@ -31,6 +30,16 @@
                 ></v-progress-circular>
               </v-row>
             </template>
+            <v-chip
+              class="ma-2"
+              @click="removeEntry(entry)"
+              bottom
+            >
+              {{ entry.name }}
+              <v-icon right>
+                mdi-delete
+              </v-icon>
+            </v-chip>
           </v-img>
         </v-badge>
       </v-col>
@@ -39,8 +48,9 @@
 </template>
 
 <script>
-  import { API } from 'aws-amplify';
+  import { API, Storage } from 'aws-amplify';
   import { listEntrys } from '../graphql/queries';
+  import { deleteEntry } from '../graphql/mutations';
 
   export default {
     name: 'EmoImages',
@@ -58,10 +68,25 @@
     methods: {
       async fetchEntries() {
         const apiData = await API.graphql({ query: listEntrys });
-        this.setEntries(apiData.data.listEntrys.items);
+        const entriesFromAPI = apiData.data.listEntrys.items;
+
+        await Promise.all(entriesFromAPI.map(async note => {
+          if (note.image) {
+            const image = await Storage.get(note.image);
+            note.image = image;
+          }
+          return note;
+        }));
+
+        this.setEntries(entriesFromAPI);
       },
       setEntries(list) {
         this.entries = list;
+      },
+      async removeEntry({ id }) {
+        const newEntries = this.entries.filter(note => note.id !== id);
+        this.setEntries(newEntries);
+        await API.graphql({ query: deleteEntry, variables: { input: { id } }});
       }
     }
   }
