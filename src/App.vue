@@ -34,6 +34,8 @@
         </amplify-authenticator>
       </div>
       <amplify-authenticator v-if="authState == 'signedin'">
+        <NewEntry/>
+        <hr/>
         <EmoImages/>
       </amplify-authenticator>
     </v-content>
@@ -42,12 +44,14 @@
 
 <script>
 import { onAuthUIStateChange } from '@aws-amplify/ui-components';
+import NewEntry from './components/NewEntry';
 import EmoImages from './components/EmoImages';
 
 export default {
   name: 'App',
 
   components: {
+    NewEntry,
     EmoImages,
   },
 
