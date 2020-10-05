@@ -18,7 +18,7 @@ exports.handler = function(event, context) {
         }
     },
     // "MaxLabels": 10,
-    "MinConfidence": 75,
+    // "MinConfidence": 75,
     "Attributes": ['Emotions']
   }
 

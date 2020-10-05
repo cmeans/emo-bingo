@@ -60,7 +60,7 @@
         "Timeout": "25",
         "Code": {
           "S3Bucket": "amplify-emobingo-dev-12728-deployment",
-          "S3Key": "amplify-builds/S3Trigger64388a0c-543064536f48392b3676-build.zip"
+          "S3Key": "amplify-builds/S3Trigger64388a0c-483947536a73742b6871-build.zip"
         }
       }
     },
