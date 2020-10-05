@@ -13,8 +13,8 @@
           overlap
         >
           <v-img
-            :src="entry.image"
-            :lazy-src="entry.image"
+            :src="entry.imageUrl"
+            :lazy-src="entry.imageUrl"
             aspect-ratio="1"
             class="grey lighten-2"
           >
@@ -70,12 +70,12 @@
         const apiData = await API.graphql({ query: listEntrys });
         const entriesFromAPI = apiData.data.listEntrys.items;
 
-        await Promise.all(entriesFromAPI.map(async note => {
-          if (note.image) {
-            const image = await Storage.get(note.image);
-            note.image = image;
+        await Promise.all(entriesFromAPI.map(async entry => {
+          if (entry.image) {
+            const imageUrl = await Storage.get(entry.image);
+            entry.imageUrl = imageUrl;
           }
-          return note;
+          return entry;
         }));
 
         this.setEntries(entriesFromAPI);
@@ -83,10 +83,19 @@
       setEntries(list) {
         this.entries = list;
       },
-      async removeEntry({ id }) {
-        const newEntries = this.entries.filter(note => note.id !== id);
+      async removeEntry(entry) {
+        console.log("Deleting:", entry);
+
+        const newEntries = this.entries.filter(note => note.id !== entry.id);
         this.setEntries(newEntries);
-        await API.graphql({ query: deleteEntry, variables: { input: { id } }});
+
+        await API.graphql({ query: deleteEntry, variables: { input: { id: entry.id }}});
+
+        // const params = {  Bucket: 'your bucket', Key: 'your object' };
+        console.log("Removing file:", entry.image)
+        Storage.remove(entry.image)
+          .then(result => console.log(result))
+          .catch(err => console.log(err));
       }
     }
   }

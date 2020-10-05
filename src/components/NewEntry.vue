@@ -76,9 +76,14 @@
           const image = file.name;
           await Storage.put(file.name, file);
 
+          console.log("file:", file);
+          console.log("image:", image);
+          const imageFileName = file.name.match(/\/(.*)$/);
+          console.log(imageFileName)
           const data = {
             name: this.name,
-            image: image
+            image: image,
+            imageFileName
           }
           await API.graphql({ query: createEntry, variables: { input: data } });
           this.clearFields();
