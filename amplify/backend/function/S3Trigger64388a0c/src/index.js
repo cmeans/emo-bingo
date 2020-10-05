@@ -18,13 +18,14 @@ exports.handler = function(event, context) {
         }
     },
     // "MaxLabels": 10,
-    // "MinConfidence": 75
+    "MinConfidence": 75,
     "Attributes": ['Emotions']
   }
 
   console.log("About to call detectFaces");
   try {
     const client = new aws.Rekognition();
+    console.log("Rekognition client:", client)
     client.detectFaces(params, function(err, response) {
       if (err) {
         console.log(err, err.stack); // an error occurred
