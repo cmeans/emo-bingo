@@ -78,8 +78,9 @@
 
           const data = {
             name: this.name,
-            image: image
+            image
           }
+
           await API.graphql({ query: createEntry, variables: { input: data } });
           this.clearFields();
           this.entriesChanged();
