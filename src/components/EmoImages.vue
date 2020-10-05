@@ -91,7 +91,6 @@
 
         await API.graphql({ query: deleteEntry, variables: { input: { id: entry.id }}});
 
-        // const params = {  Bucket: 'your bucket', Key: 'your object' };
         console.log("Removing file:", entry.image)
         Storage.remove(entry.image)
           .then(result => console.log(result))
