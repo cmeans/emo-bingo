@@ -34,10 +34,9 @@
         </amplify-authenticator>
       </div>
       <amplify-authenticator v-if="authState == 'signedin'">
-        <NewEntry/>
-        <v-divider
-          inset
-        ></v-divider>
+        <div class="ma-4">
+          <NewEntry/>
+        </div>
         <EmoImages/>
       </amplify-authenticator>
     </v-main>

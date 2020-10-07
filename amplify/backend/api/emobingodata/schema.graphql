@@ -4,4 +4,8 @@ type Entry @model
   name: String!
   note: String
   image: String
+  faces: Int
+  emotions: Int
+  emotion: String
+  confidence: Float
 }

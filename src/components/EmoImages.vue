@@ -2,10 +2,33 @@
   <v-container>
     <v-row>
       <v-col
+        cols="12"
+      >
+        <v-btn-toggle
+          v-model="imageSize"
+          mandatory
+        >
+          <v-btn :value="2">
+            Small
+          </v-btn>
+          <v-btn :value="3">
+            Medium
+          </v-btn>
+          <v-btn :value="6">
+            Large
+          </v-btn>
+          <v-btn :value="12">
+            Whopping!
+          </v-btn>
+        </v-btn-toggle>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col
         v-for="entry in entries"
         :key="entry.id"
         class="d-flex child-flex"
-        cols="2"
+        :cols="imageSize"
       >
         <v-badge
           bordered
@@ -56,6 +79,7 @@
     name: 'EmoImages',
 
     data: () => ({
+      imageSize: 300,
       entries: []
     }),
     mounted() {
@@ -67,13 +91,19 @@
     },
     methods: {
       async fetchEntries() {
-        const apiData = await API.graphql({ query: listEntrys });
+        const apiData = await API.graphql({ query: listEntrys});
         const entriesFromAPI = apiData.data.listEntrys.items;
 
+      console.log(entriesFromAPI)
         await Promise.all(entriesFromAPI.map(async entry => {
           if (entry.image) {
             const imageUrl = await Storage.get(entry.image);
             entry.imageUrl = imageUrl;
+
+            const img = await Storage.get(entry.image, { maxkeys: 4 }  , false)
+            console.log(img)
+            // const tagging = await Storage.getTagging(entry.image);
+            // console.log(tagging);
           }
           return entry;
         }));

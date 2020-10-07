@@ -1,49 +1,77 @@
 <template>
-  <v-card>
-  <v-form ref="form" v-model="isFormValid">
-    <v-container>
-      <v-row>
-        <v-col
-          cols="12"
-          md="4"
-        >
-          <v-text-field
-            :rules="[v => !!v || 'Item is required']"
-            v-model="name"
-            label="Attempted Emotion"
-          />
-        </v-col>
-        <v-col
-          cols="12"
-          md="4"
-        >
-          <v-file-input
-            :rules="[v => (!!v || v != [] || v != '') || 'Item is required']"
-            v-model="imageFile"
-            label="Emo Selfie"
-            accept="image/*"
-            capture="environment"
-          />
-        </v-col>
-        <v-col
-          cols="12"
-          md="4"
-        >
+  <v-card
+    outlined
+    elevation="6"
+    >
+    <v-card-title>New Entry</v-card-title>
+    <v-card-text>
+      <v-form
+        ref="form"
+        v-model="isFormValid"
+      >
+        <v-container>
+          <v-row>
+            <!-- <v-col
+              cols="12"
+              md="3"
+            >
+              <v-text-field
+                :rules="[v => !!v || 'Item is required']"
+                v-model="name"
+                label="Attempted Emotion"
+              />
+            </v-col> -->
+            <v-col
+              cols="12"
+              md="4"
+            >
+              <v-file-input
+                required
+                show-size
+                :rules="[v => (!!v && v != [] && v != '') || 'Item is required']"
+                @change="doPreviewImage"
+                v-model="imageFile"
+                prepend-icon="mdi-camera"
+                label="Emotional Selfie"
+                accept="image/*.png,image/*.jpg"
+                capture="user"
+                compact="true"
+              >
+              </v-file-input>
+            </v-col>
+            <v-col
+              cols="12"
+              md="4"
+            >
+              <v-card>
+                <v-card-title>Preview</v-card-title>
+                <v-card-text>
+                  <v-img
+                    :src="getPreviewImageUrl"
+                    width="50%"
+                    scale="1"
+                  >
+                  </v-img>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-overlay :value="overlay">
+          <v-progress-circular
+            indeterminate
+            size="64"
+          ></v-progress-circular>
+        </v-overlay>
+        <v-card-actions>
           <v-btn
             :disabled="!isFormValid && !overlay"
             v-on:click="saveEntry">
             Submit to Rekognition
           </v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
-    <v-overlay :value="overlay">
-      <v-progress-circular
-        indeterminate
-        size="64"
-      ></v-progress-circular>
-    </v-overlay>
-  </v-form>
+        </v-card-actions>
+      </v-form>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -58,14 +86,30 @@
       isFormValid: false,
       overlay: false,
       name: '',
-      imageFile: []
+      imageFile: [],
+      previewImage: ''
     }),
+    computed: {
+      getPreviewImageUrl() {
+        return this.previewImage;
+      }
+    },
     methods: {
       clearFields() {
         this.$refs.form.reset();
       },
       entriesChanged() {
         this.$root.$emit('entries-changed');
+      },
+      doPreviewImage(file) {
+        if (this.previewImage) {
+          URL.revokeObjectURL(this.previewImage) // free memory
+        }
+        if (file === undefined) {
+          this.previewImage = null;
+        } else {
+          this.previewImage = URL.createObjectURL(file);
+        }
       },
       async saveEntry() {
         if (!this.isFormValid) return;

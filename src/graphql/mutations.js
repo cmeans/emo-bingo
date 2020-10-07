@@ -11,6 +11,10 @@ export const createEntry = /* GraphQL */ `
       name
       note
       image
+      faces
+      emotions
+      emotion
+      confidence
       createdAt
       updatedAt
       owner
@@ -27,6 +31,10 @@ export const updateEntry = /* GraphQL */ `
       name
       note
       image
+      faces
+      emotions
+      emotion
+      confidence
       createdAt
       updatedAt
       owner
@@ -43,6 +51,10 @@ export const deleteEntry = /* GraphQL */ `
       name
       note
       image
+      faces
+      emotions
+      emotion
+      confidence
       createdAt
       updatedAt
       owner

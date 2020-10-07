@@ -8,6 +8,10 @@ export const getEntry = /* GraphQL */ `
       name
       note
       image
+      faces
+      emotions
+      emotion
+      confidence
       createdAt
       updatedAt
       owner
@@ -26,6 +30,10 @@ export const listEntrys = /* GraphQL */ `
         name
         note
         image
+        faces
+        emotions
+        emotion
+        confidence
         createdAt
         updatedAt
         owner

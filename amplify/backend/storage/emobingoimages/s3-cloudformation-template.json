@@ -499,7 +499,8 @@
                         {
                             "Effect": "Allow",
                             "Action": [
-                                "s3:GetObject"
+                                "s3:GetObject",
+                                "s3:GetObjectTagging"
                             ],
                             "Resource": [
                                 {
@@ -735,6 +736,7 @@
                             "Effect": "Allow",
                             "Action": [
                                 "s3:PutObject",
+                                "se:PutObjectTagging",
                                 "s3:GetObject",
                                 "s3:ListBucket",
                                 "s3:DeleteObject"
