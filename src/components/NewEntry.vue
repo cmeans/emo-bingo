@@ -1,29 +1,40 @@
 <template>
+  <div>
   <v-card
     outlined
     elevation="6"
+    class="pa-2 float-left"
     >
-    <v-card-title>New Entry</v-card-title>
-    <v-card-text>
+    <v-card-title>
+      <v-icon>
+        mdi-new-box
+      </v-icon>
+      New Entry
+    </v-card-title>
+    <div>
       <v-form
         ref="form"
         v-model="isFormValid"
       >
-        <v-container>
+        <v-container
+          fluid
+          style="border: 1px solid black"
+        >
           <v-row>
-            <!-- <v-col
+            <v-col
               cols="12"
-              md="3"
+              md="5"
             >
               <v-text-field
                 :rules="[v => !!v || 'Item is required']"
                 v-model="name"
-                label="Attempted Emotion"
+                label="Entry Name"
+                prepend-icon="mdi-tag-text"
               />
-            </v-col> -->
+            </v-col>
             <v-col
               cols="12"
-              md="4"
+              md="6"
             >
               <v-file-input
                 required
@@ -35,25 +46,8 @@
                 label="Emotional Selfie"
                 accept="image/*.png,image/*.jpg"
                 capture="user"
-                compact="true"
               >
               </v-file-input>
-            </v-col>
-            <v-col
-              cols="12"
-              md="4"
-            >
-              <v-card>
-                <v-card-title>Preview</v-card-title>
-                <v-card-text>
-                  <v-img
-                    :src="getPreviewImageUrl"
-                    width="50%"
-                    scale="1"
-                  >
-                  </v-img>
-                </v-card-text>
-              </v-card>
             </v-col>
           </v-row>
         </v-container>
@@ -67,12 +61,33 @@
           <v-btn
             :disabled="!isFormValid && !overlay"
             v-on:click="saveEntry">
+            <v-icon>
+              mdi-check-bold
+            </v-icon>
             Submit to Rekognition
           </v-btn>
         </v-card-actions>
       </v-form>
-    </v-card-text>
+    </div>
   </v-card>
+      <v-card
+        class="float-left">
+        <v-card-title>
+          <v-icon>
+            mdi-mirror
+          </v-icon>
+          Preview
+        </v-card-title>
+        <v-card-text>
+          <v-img
+            :src="getPreviewImageUrl"
+            width="50%"
+            scale="1"
+          >
+          </v-img>
+        </v-card-text>
+      </v-card>
+  </div>
 </template>
 
 <script>
