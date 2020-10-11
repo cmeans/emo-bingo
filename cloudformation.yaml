@@ -1,0 +1,399 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  Env:
+    Type: String
+    Default: 'dev'
+
+  Repository:
+    Type: String
+    Description: GitHub Repository URL
+
+  OauthToken:
+    Type: String
+    Description: GitHub Repository URL
+    NoEcho: true
+
+  Domain:
+    Type: String
+    Description: Domain name to host application
+
+  UserPoolName:
+    Type: String
+    Default: emobingo6769acca_userpool_6769acca
+
+  IdentityPoolName:
+    Type: String
+    Default: emobingo6769acca_identitypool_6769acca
+
+  AllowUnauthenticatedIdentities:
+    Type: String
+    Default: 'false'
+
+    #   resourceNameTruncated=emobin6769acca \
+  AutoVerifiedAttributes:
+    Type: CommaDelimitedList
+    Default:
+      email
+
+  EmailVerificationSubject:
+    Type: String
+    Default: "Your emo-bingo verification code"
+
+  EmailVerificationMessage:
+    Type: String
+    Default: "Your verification code is {####}"
+
+  DefaultPasswordPolicy:
+    Type: String
+    Default: 'false'
+
+  PasswordPolicyMinLength:
+    Type: Number
+    Default: 8
+
+  PasswordPolicyCharacters:
+    Type: CommaDelimitedList
+    Default: ''
+
+  UserpoolClientLambdaRole:
+    Type: String
+    Default: emobin6769acca_userpoolclient_lambda_role
+
+Conditions:
+  ShouldNotCreateEnvResources: !Equals [ !Ref Env, NONE ]
+
+Resources:
+
+  AuthenticatetdRole:
+    Type: AWS::IAM::Role
+    Properties:
+
+  UnauthenticatedRole:
+    Type: AWS::IAM::Role
+
+  AmplifyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - amplify.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: Amplify
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "amplify:*"
+                Resource: "*"
+
+  AmplifyApp:
+    Type: "AWS::Amplify::App"
+    Properties:
+      Name: emoBingoApp
+      Repository: !Ref Repository
+      Description: emoBingo app
+      OauthToken: !Ref OauthToken
+      EnvironmentVariables:
+        - Name: env
+          Value: dev
+      BuildSpec: |-
+        version: 0.1
+        # ** NOT READY FOR THIS YET **
+        # backend:
+        #   phases:
+        #     build:
+        #       commands:
+        #         - amplifyPush --simple
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - nvm install 12.8.1
+                - yarn install
+            build:
+              commands:
+                - yarn run build
+          artifacts:
+            baseDirectory: dist
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - node_modules/**/*
+      Tags:
+        - Key: Name
+          Value: emoBingo
+      IAMServiceRole: !GetAtt AmplifyRole.Arn
+
+  AmplifyBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      BranchName: main
+      AppId: !GetAtt AmplifyApp.AppId
+      Description: Main Branch
+      EnableAutoBuild: true
+      Tags:
+        - Key: Name
+          Value: emobingo-main
+        - Key: Branch
+          Value: main
+
+  AmplifyDomain:
+    Type: AWS::Amplify::Domain
+    Properties:
+      DomainName: !Ref Domain
+      AppId: !GetAtt AmplifyApp.AppId
+      SubDomainSettings:
+        - Prefix: main
+          BranchName: !GetAtt AmplifyBranch.BranchName
+
+  # Auth:
+  #   Type: 'AWS::Cognito'
+  #   Properties:
+  #     CustomAuth: false
+
+  # API:
+  #   Type: 'AWS::AppSync'
+
+  UserPool:
+  # Created upon user selection
+  # Depends on SNS Role for Arn if MFA is enabled
+    Type: 'AWS::Cognito::UserPool'
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !If [ShouldNotCreateEnvResources, !Ref UserPoolName, !Join ['',[!Ref UserPoolName, '-', !Ref Env]]]
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+        - Name: verified_email
+          Priority: 1
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: true
+      AutoVerifiedAttributes: !Ref AutoVerifiedAttributes
+      EmailVerificationMessage: !Ref EmailVerificationMessage
+      EmailVerificationSubject: !Ref EmailVerificationSubject
+      UsernameConfiguration:
+          CaseSensitive: false
+      Policies:
+        PasswordPolicy:
+          MinimumLength: !Ref PasswordPolicyMinLength
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      MfaConfiguration: 'OFF'
+      # SmsVerificationMessage: !Ref smsVerificationMessage
+      # SmsConfiguration:
+      #   SnsCallerArn: !GetAtt SNSRole.Arn
+      #   ExternalId: emobin6769acca_role_external_id
+
+  UserPoolGroupAdmins:
+    Type: 'AWS::Cognito::UserPoolGroup'
+    Properties:
+      GroupName: Admins
+      UserPoolId: !Ref UserPool
+
+  UserPoolGroupUsers:
+    Type: 'AWS::Cognito::UserPoolGroup'
+    Properties:
+      GroupName: Users
+      UserPoolId: !Ref UserPool
+
+  UserPoolClientWeb:
+  # Created provide application access to user pool
+  # Depends on UserPool for ID reference
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties:
+      ClientName: emobin6769acca_app_clientWeb
+      RefreshTokenValidity: !Ref userpoolClientRefreshTokenValidity
+      UserPoolId: !Ref UserPool
+    DependsOn: UserPool
+
+  UserPoolClient:
+  # Created provide application access to user pool
+  # Depends on UserPool for ID reference
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties:
+      ClientName: emobin6769acca_app_client
+      GenerateSecret: !Ref userpoolClientGenerateSecret
+      RefreshTokenValidity: !Ref userpoolClientRefreshTokenValidity
+      UserPoolId: !Ref UserPool
+    DependsOn: UserPool
+
+  # BEGIN USER POOL LAMBDA RESOURCES
+  UserPoolClientRole:
+  # Created to execute Lambda which gets userpool app client config values
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !If [ShouldNotCreateEnvResources, !Ref UserpoolClientLambdaRole, !Join ['',['upClientLambdaRole', '6769acca', !Select [3, !Split ['-', !Ref 'AWS::StackName']], '-', !Ref Env]]]
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+    DependsOn: UserPoolClient
+  UserPoolClientLambda:
+  # Lambda which gets userpool app client config values
+  # Depends on UserPool for id
+  # Depends on UserPoolClientRole for role ARN
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        ZipFile: !Join
+          - |+
+          - - 'const response = require(''cfn-response'');'
+            - 'const aws = require(''aws-sdk'');'
+            - 'const identity = new aws.CognitoIdentityServiceProvider();'
+            - 'exports.handler = (event, context, callback) => {'
+            - ' if (event.RequestType == ''Delete'') { '
+            - '   response.send(event, context, response.SUCCESS, {})'
+            - ' }'
+            - ' if (event.RequestType == ''Update'' || event.RequestType == ''Create'') {'
+            - '   const params = {'
+            - '     ClientId: event.ResourceProperties.clientId,'
+            - '     UserPoolId: event.ResourceProperties.userpoolId'
+            - '   };'
+            - '   identity.describeUserPoolClient(params).promise()'
+            - '     .then((res) => {'
+            - '       response.send(event, context, response.SUCCESS, {''appSecret'': res.UserPoolClient.ClientSecret});'
+            - '     })'
+            - '     .catch((err) => {'
+            - '       response.send(event, context, response.FAILED, {err});'
+            - '     });'
+            - ' }'
+            - '};'
+      Handler: index.handler
+      Runtime: nodejs10.x
+      Timeout: '300'
+      Role: !GetAtt
+        - UserPoolClientRole
+        - Arn
+    DependsOn: UserPoolClientRole
+
+  UserPoolClientLambdaPolicy:
+  # Sets userpool policy for the role that executes the Userpool Client Lambda
+  # Depends on UserPool for Arn
+  # Marked as depending on UserPoolClientRole for easier to understand CFN sequencing
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: emobin6769acca_userpoolclient_lambda_iam_policy
+      Roles:
+        - !Ref UserPoolClientRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'cognito-idp:DescribeUserPoolClient'
+            Resource: !GetAtt UserPool.Arn
+    DependsOn: UserPoolClientLambda
+
+  UserPoolClientLogPolicy:
+  # Sets log policy for the role that executes the Userpool Client Lambda
+  # Depends on UserPool for Arn
+  # Marked as depending on UserPoolClientLambdaPolicy for easier to understand CFN sequencing
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: emobin6769acca_userpoolclient_lambda_log_policy
+      Roles:
+        - !Ref UserPoolClientRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Resource: !Sub
+              - arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${lambda}:log-stream:*
+              - { region: !Ref "AWS::Region",  account: !Ref "AWS::AccountId", lambda: !Ref UserPoolClientLambda}
+    DependsOn: UserPoolClientLambdaPolicy
+  UserPoolClientInputs:
+  # Values passed to Userpool client Lambda
+  # Depends on UserPool for Id
+  # Depends on UserPoolClient for Id
+  # Marked as depending on UserPoolClientLambdaPolicy for easier to understand CFN sequencing
+    Type: 'Custom::LambdaCallout'
+    Properties:
+      ServiceToken: !GetAtt UserPoolClientLambda.Arn
+      clientId: !Ref UserPoolClient
+      userpoolId: !Ref UserPool
+    DependsOn: UserPoolClientLogPolicy
+
+
+
+
+
+
+
+  # BEGIN IDENTITY POOL RESOURCES
+
+  IdentityPool:
+  # Always created
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !If [ShouldNotCreateEnvResources, 'emobingo6769acca_identitypool_6769acca', !Join ['',['emobingo6769acca_identitypool_6769acca', '__', !Ref Env]]]
+
+      CognitoIdentityProviders:
+        - ClientId:  !Ref UserPoolClient
+          ProviderName: !Sub
+            - cognito-idp.${region}.amazonaws.com/${client}
+            - { region: !Ref "AWS::Region",  client: !Ref UserPool}
+        - ClientId:  !Ref UserPoolClientWeb
+          ProviderName: !Sub
+            - cognito-idp.${region}.amazonaws.com/${client}
+            - { region: !Ref "AWS::Region",  client: !Ref UserPool}
+
+      AllowUnauthenticatedIdentities: !Ref AllowUnauthenticatedIdentities
+    DependsOn: UserPoolClientInputs
+
+
+  IdentityPoolRoleMap:
+  # Created to map Auth and Unauth roles to the identity pool
+  # Depends on Identity Pool for ID ref
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+          unauthenticated: !Ref UnauthRoleArn
+          authenticated: !Ref AuthRoleArn
+    DependsOn: IdentityPool
+
+Outputs:
+  DefaultDomain:
+    Value: !Join [ ".", [ !GetAtt AmplifyBranch.BranchName, !GetAtt AmplifyApp.DefaultDomain]]
+
+  # MasterBranchUrl:
+  #   Value: !Join [ ".", [ !GetAtt AmplifyBranch.BranchName, !GetAtt AmplifyDomain.DomainName ]]
+  IdentityPoolId:
+    Value: !Ref 'IdentityPool'
+    Description:  Id for the identity pool
+  IdentityPoolName:
+    Value: !GetAtt IdentityPool.Name
+  UserPoolId:
+    Value: !Ref 'UserPool'
+    Description:  Id for the user pool
+  UserPoolName:
+    Value: !Ref userPoolName
+  AppClientIDWeb:
+    Value: !Ref 'UserPoolClientWeb'
+    Description: The user pool app client id for web
+  AppClientID:
+    Value: !Ref 'UserPoolClient'
+    Description: The user pool app client id
+  AppClientSecret:
+    Value: !GetAtt UserPoolClientInputs.appSecret
