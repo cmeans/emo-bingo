@@ -2595,6 +2595,11 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
+"@inotom/vue-curve-text@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@inotom/vue-curve-text/-/vue-curve-text-2.0.0.tgz#bf04aab165d4b6ff28d43541d8567f4a71ed015b"
+  integrity sha512-b0cyECMAMIvA66fJm4xNIA0fHkatmhGlMXJXovHfekKGOT5/Pjtt0XznW44OD93mOdT4UWAjDk36M/kXLpahzg==
+
 "@intervolga/optimize-cssnano-plugin@^1.0.5":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@intervolga/optimize-cssnano-plugin/-/optimize-cssnano-plugin-1.0.6.tgz#be7c7846128b88f6a9b1d1261a0ad06eb5c0fdf8"

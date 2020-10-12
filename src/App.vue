@@ -39,8 +39,16 @@
         </div>
         <EmoImages />
       </amplify-authenticator> -->
-      <BingoCard class="float-right"/>
-      <Spinner class="float-left"/>
+      <v-container>
+        <v-layout row>
+          <v-flex md4 class="d-flex">
+            <SpinningWheel :items="items"/>
+          </v-flex>
+          <v-flex md8>
+            <BingoCard :items="items" />
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-main>
   </v-app>
 </template>
@@ -50,8 +58,20 @@ import { onAuthUIStateChange } from '@aws-amplify/ui-components';
 // import NewEntry from './components/NewEntry';
 // import EmoImages from './components/EmoImages';
 import BingoCard from './components/BingoCard';
-import Spinner from './components/Spinner';
+// import Spinner from './components/Spinner';
+import SpinningWheel from './components/SpinningWheel';
 
+const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
+
+const ITEMS = EMOTIONS.map((value) => {
+  return {
+    icon: `/images/emotions/${value}.png`,
+    size: 64,
+    name: value
+  }
+})
+
+console.log(ITEMS)
 export default {
   name: 'App',
 
@@ -59,7 +79,7 @@ export default {
     // NewEntry,
     // EmoImages,
     BingoCard,
-    Spinner
+    SpinningWheel
   },
 
   created() {
@@ -70,7 +90,8 @@ export default {
   },
   data: () => ({
     user: undefined,
-    authState: undefined
+    authState: undefined,
+    items: ITEMS
   }),
   beforeDestroy() {
     return onAuthUIStateChange;
