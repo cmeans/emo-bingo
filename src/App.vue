@@ -40,19 +40,9 @@
         <EmoImages />
       </amplify-authenticator> -->
       <v-container>
-        <v-layout row>
-          <v-flex md4>
-            <div height="300px">
-            <!-- <SpinningWheel :items="items"/> -->
-            <v-btn>Play</v-btn>
-            </div>
-          </v-flex>
-        </v-layout>
-        <v-layout row>
-          <v-flex md8>
-            <BingoCard :items="items" />
-          </v-flex>
-        </v-layout>
+        <v-btn v-on:click="playing = !playing">Play</v-btn>
+        <SpinningWheel v-if="playing" :items="items" />
+        <BingoCard v-if="!playing" :items="items" />
       </v-container>
     </v-main>
   </v-app>
@@ -64,7 +54,7 @@ import { onAuthUIStateChange } from '@aws-amplify/ui-components';
 // import EmoImages from './components/EmoImages';
 import BingoCard from './components/BingoCard';
 // import Spinner from './components/Spinner';
-// import SpinningWheel from './components/SpinningWheel';
+import SpinningWheel from './components/SpinningWheel';
 
 const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
 
@@ -83,7 +73,7 @@ export default {
     // NewEntry,
     // EmoImages,
     BingoCard,
-    // SpinningWheel
+    SpinningWheel
   },
 
   created() {
@@ -95,7 +85,8 @@ export default {
   data: () => ({
     user: undefined,
     authState: undefined,
-    items: ITEMS
+    items: ITEMS,
+    playing: false
   }),
   beforeDestroy() {
     return onAuthUIStateChange;
