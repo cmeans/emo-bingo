@@ -10,15 +10,16 @@
           <BingoCell>
             <template v-slot:emotion>
               <v-card-text>
-              <div class="d-flex justify-center">
-                {{ emotion().name }}
-              </div>
-              <p>
-                <v-img
-                  contained
-                  :src=emotion().icon
-                />
-              </p>
+                <div class="d-flex justify-center">
+                  {{ emotion().name }}
+                </div>
+                <p>
+                  <v-img
+                    contained
+                    :src=emotion().icon
+                    width="100%"
+                  />
+                </p>
               </v-card-text>
             </template>
           </BingoCell>

@@ -41,9 +41,14 @@
       </amplify-authenticator> -->
       <v-container>
         <v-layout row>
-          <v-flex md4 class="d-flex">
-            <SpinningWheel :items="items"/>
+          <v-flex md4>
+            <div height="300px">
+            <!-- <SpinningWheel :items="items"/> -->
+            <v-btn>Play</v-btn>
+            </div>
           </v-flex>
+        </v-layout>
+        <v-layout row>
           <v-flex md8>
             <BingoCard :items="items" />
           </v-flex>
@@ -59,7 +64,7 @@ import { onAuthUIStateChange } from '@aws-amplify/ui-components';
 // import EmoImages from './components/EmoImages';
 import BingoCard from './components/BingoCard';
 // import Spinner from './components/Spinner';
-import SpinningWheel from './components/SpinningWheel';
+// import SpinningWheel from './components/SpinningWheel';
 
 const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
 
@@ -71,7 +76,6 @@ const ITEMS = EMOTIONS.map((value) => {
   }
 })
 
-console.log(ITEMS)
 export default {
   name: 'App',
 
@@ -79,7 +83,7 @@ export default {
     // NewEntry,
     // EmoImages,
     BingoCard,
-    SpinningWheel
+    // SpinningWheel
   },
 
   created() {
