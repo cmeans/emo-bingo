@@ -4,7 +4,6 @@
     <div id="question"><h1></h1></div>
   </v-card>
 </template>
-<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
 
   // import 'https://d3js.org/d3.v3.min.js';
