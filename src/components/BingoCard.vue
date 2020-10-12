@@ -14,7 +14,10 @@
                 {{ emotion().name }}
               </div>
               <p>
-                <v-img :src=emotion().icon width="64" height="64" />
+                <v-img
+                  contained
+                  :src=emotion().icon
+                />
               </p>
               </v-card-text>
             </template>
