@@ -10,7 +10,7 @@
           <BingoCell :text="letter"></BingoCell>
         </v-col>
       </v-row>
-      <!-- <v-layout wrap>
+      <v-layout wrap>
         <v-flex xs2 v-for="row in [1,2,3,4,5]" :key="row">
           <v-flex auto v-for="col in [1,2,3,4,5]" :key="col">
             <BingoCell>
@@ -31,8 +31,8 @@
           </v-flex>
           <br />
         </v-flex>
-      </v-layout> -->
-      <div class="d-flex">
+      </v-layout>
+      <!-- <div class="d-flex">
         <v-flex row v-for="row in [1,2,3,4,5]" :key="row">
           <v-flex
             auto
@@ -56,7 +56,7 @@
             </BingoCell>
           </v-flex>
         </v-flex>
-      </div>
+      </div> -->
       <!-- <v-row v-for="row in [1,2,3,4,5]" v-bind:key="row">
         <v-col cols="1" v-for="col in [1,2,3,4,5]" v-bind:key="col">
         <v-flex auto v-for="col in [1,2,3,4,5]" :key="col">
