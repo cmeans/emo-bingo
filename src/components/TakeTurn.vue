@@ -21,39 +21,15 @@
 </template>
 
 <script>
-  import BingoCell from './BingoCell';
-
   export default {
-    name: 'BingoCard',
+    name: 'TakeTurn',
 
     components: {
-      BingoCell
     },
     props: [
       'items'
     ],
     data: () => ({
-      lastEmotion: null
-    }),
-    computed: {
-      width() {
-        switch (this.$vuetify.breakpoint.name) {
-          case 'xs':
-          case 'sm':
-            return 40;
-        }
-
-        return 100;
-      }
-    },
-    methods: {
-      getRandomItem() {
-        return this.items[Math.floor(Math.random() * this.items.length)];
-      },
-      emotion() {
-        this.lastEmotion = this.getRandomItem();
-        return this.lastEmotion;
-      }
-    }
+    })
   }
 </script>
