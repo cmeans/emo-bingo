@@ -1,21 +1,18 @@
 <template>
   <v-card>
-    <!--
-    <div class="text-center letter" v-resize-text="{ratio:1.2, minFontSize: '40px', maxFontSize: '200px', delay: 200}">
-//-->
-    <div>
+    <div class="text-center letter" v-resize-text="{ratio:1.2, minFontSize: '40px', maxFontSize: '200px', delay: 0}">
       {{ text }}
     </div>
-    <slot name="emotion-entry"></slot>
+    <slot name="emotion"></slot>
   </v-card>
 </template>
 
 <script>
-  //import ResizeText from 'vue-resize-text';
+  import ResizeText from 'vue-resize-text';
 
   export default {
     directives: {
-      //ResizeText
+      ResizeText
     },
     name: 'BingoCell',
     props: [
