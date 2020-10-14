@@ -87,7 +87,7 @@
       return (this.pickedItems.length == this.items.length);
     },
     spinnerDisabled() {
-      return (this.done || this.rolling);
+      return (this.done || this.rolling || this.disabled);
     }
   },
   methods: {
