@@ -31,7 +31,7 @@
               :style="`transform: rotate(${(360/ prizeList.length) * index}deg)`"
             >
               <div class="prize-name">
-                <v-chip class="item-selected">
+                <v-chip :id="item.name">
                   <curve-text
                     :r="5"
                     offset="50%"
@@ -41,7 +41,7 @@
                   >{{ item.name }}</curve-text>
                 </v-chip>
               </div>
-              <div class="prize-icon">
+              <div class="prize-icon ma-2">
                 <img :src="item.icon" :width="item.size">
               </div>
             </div>
@@ -49,8 +49,6 @@
         </div>
       </div>
     </div>
-    <v-overlay absolute="absolute" :value="disabled">
-    </v-overlay>
   </v-card>
   </div>
 </template>
@@ -124,6 +122,12 @@
 
         let item = prizeList[result];
         item.selected = true;
+
+        const chip = document.getElementById(item.name);
+        chip.style.backgroundColor = 'green';
+        chip.style.color = 'white';
+        chip.style.fontWeight = 'bold';
+
         this.$root.$emit('emotion', item.name);
       }, 4500);
     }
@@ -224,8 +228,8 @@
   .prize-icon {
   }
 
-  .item-selected {
-    background-color: black;
+  .theme--light.v-chip.item-selected {
+    background: black;
     color: white;
   }
 }

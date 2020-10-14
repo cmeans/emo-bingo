@@ -9,7 +9,7 @@
       <v-icon>
         mdi-new-box
       </v-icon>
-      New Entry
+      New Selfie
     </v-card-title>
     <div>
       <v-form
@@ -21,7 +21,7 @@
           style="border: 1px solid black"
         >
           <v-row>
-            <v-col
+            <!-- <v-col
               cols="12"
               md="5"
             >
@@ -31,10 +31,9 @@
                 label="Entry Name"
                 prepend-icon="mdi-tag-text"
               />
-            </v-col>
+            </v-col> -->
             <v-col
               cols="12"
-              md="6"
             >
               <v-file-input
                 required

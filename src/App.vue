@@ -63,7 +63,7 @@ const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowe
 const ITEMS = EMOTIONS.map((value) => {
   return {
     icon: `/images/emotions/${value}-tight.png`,
-    size: 32,
+    size: 50,
     name: value
   }
 })
