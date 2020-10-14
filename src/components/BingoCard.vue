@@ -1,18 +1,25 @@
 <template>
   <v-card
     outlined
+    tile
     elevation="2"
-    class="d-flex flex-1"
+    class=""
+    style="max-width: 200vh"
   >
     <v-container>
-      <v-row>
+      <v-layout nowrap>
+        <v-flex xs2 v-for="letter in 'B I N G O'.split(' ')" v-bind:key="letter">
+          <BingoCell :text="letter"></BingoCell>
+        </v-flex>
+      </v-layout>
+      <!-- <v-row>
         <v-col cols="2" v-for="letter in 'B I N G O'.split(' ')" v-bind:key="letter">
           <BingoCell :text="letter"></BingoCell>
         </v-col>
-      </v-row>
-      <v-layout wrap>
-        <v-flex xs2 v-for="row in [1,2,3,4,5]" :key="row">
-          <v-flex auto v-for="col in [1,2,3,4,5]" :key="col">
+      </v-row> -->
+      <v-layout nowrap>
+        <v-flex xs1 v-for="row in [1,2,3,4,5]" :key="row">
+          <v-flex auto v-for="col in [1,2,3,4,5]" :key="col" v-bind:style="{ width: size }">
             <BingoCell>
               <template v-slot:emotion>
                 <v-card-text>
@@ -21,8 +28,8 @@
                       {{ emotion().name }}
                     </div>
                     <v-img
+                      scale="1"
                       :src=lastEmotion.icon
-                      :width="width"
                     />
                   </div>
                 </v-card-text>
@@ -96,14 +103,14 @@
       lastEmotion: null
     }),
     computed: {
-      width() {
+      size() {
         switch (this.$vuetify.breakpoint.name) {
           case 'xs':
           case 'sm':
-            return 40;
+            return '40px';
         }
 
-        return 100;
+        return '80px';
       }
     },
     methods: {

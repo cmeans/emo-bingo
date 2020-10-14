@@ -1,7 +1,10 @@
 <template>
-   <v-card
+  <v-card
+    elevation="0"
     class="ma-4"
-   >
+    height="310"
+    width="310"
+  >
   <div class="wheel-wrapper">
     <v-btn
       class="wheel-pointer"

@@ -40,9 +40,15 @@
         <EmoImages />
       </amplify-authenticator> -->
       <v-container>
-        <v-btn v-on:click="playing = !playing">Play</v-btn>
-        <SpinningWheel v-if="playing" :items="items" />
-        <BingoCard v-if="!playing" :items="items" />
+        <v-btn v-on:click="playing = !playing">Take a Turn</v-btn>
+        <v-slide-y-transition>
+          <v-card-text v-show="playing">
+            <TakeTurn :items="items" />
+          </v-card-text>
+        </v-slide-y-transition>
+        <v-slide-x-transition>
+          <BingoCard v-if="!playing" :items="items" />
+        </v-slide-x-transition>
       </v-container>
     </v-main>
   </v-app>
@@ -52,16 +58,16 @@
 import { onAuthUIStateChange } from '@aws-amplify/ui-components';
 // import NewEntry from './components/NewEntry';
 // import EmoImages from './components/EmoImages';
-import BingoCard from './components/BingoCard';
+import BingoCard from './components/BingoSquare';
+import TakeTurn from './components/TakeTurn';
 // import Spinner from './components/Spinner';
-import SpinningWheel from './components/SpinningWheel';
 
 const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
 
 const ITEMS = EMOTIONS.map((value) => {
   return {
-    icon: `/images/emotions/${value}.png`,
-    size: 64,
+    icon: `/images/emotions/${value}-tight.png`,
+    size: 32,
     name: value
   }
 })
@@ -73,7 +79,7 @@ export default {
     // NewEntry,
     // EmoImages,
     BingoCard,
-    SpinningWheel
+    TakeTurn
   },
 
   created() {
