@@ -1,10 +1,7 @@
 <template>
   <v-card
     outlined
-    tile
     elevation="2"
-    class=""
-    style="max-width: 200vh"
   >
     <v-container>
       <v-layout nowrap>

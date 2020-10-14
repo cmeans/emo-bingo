@@ -1,23 +1,17 @@
 <template>
   <v-card
+    outlined
     elevation="2"
-    height="500"
+    class="d-flex"
   >
     <v-card-title>
       Click the spinner to see which emotion you must present.
     </v-card-title>
     <v-card-text>
-      <!-- <v-img
-        contain
-        src="/images/selfie.png"
-        height="200"
-      /> -->
-      <p>
-      </p>
-      <SpinningWheel :items="items" />
+      <SpinningWheel :items="items" :disabled="!!emotion"/>
     </v-card-text>
     <v-card-actions>
-      <v-btn>Submit Your Selfie</v-btn>
+      <v-btn :disabled="!emotion">Take Your "{{ emotion }}" Selfie</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -35,7 +29,13 @@
       'items'
     ],
     data: () => ({
-    })
+      emotion: ''
+    }),
+    mounted() {
+      this.$root.$on('emotion', (text) => {
+        this.emotion = text;
+      });
+    }
   }
 </script>
 <style scoped>

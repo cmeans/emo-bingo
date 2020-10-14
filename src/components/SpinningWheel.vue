@@ -1,53 +1,58 @@
 <template>
+  <div>
   <v-card
     elevation="0"
     class="ma-4"
     height="310"
     width="310"
   >
-  <div class="wheel-wrapper">
-    <v-btn
-      class="wheel-pointer"
-      v-on:click="onClickRotate"
-      :disabled="spinnerDisabled"
-    >
-      Spin
-    </v-btn>
-    <div
-      class="wheel-bg"
-      :class="{freeze: freeze}"
-      :style="`transform: rotate(${wheelDeg}deg)`"
-    >
-      <div class="prize-list">
-        <div
-          class="prize-item-wrapper"
-          v-for="(item,index) in prizeList"
-          :key="index"
-        >
+    <div class="wheel-wrapper">
+      <v-btn
+        class="wheel-pointer"
+        v-on:click="onClickRotate"
+        :disabled="spinnerDisabled"
+      >
+        Spin
+      </v-btn>
+      <div
+        class="wheel-bg"
+        :class="{freeze: freeze}"
+        :style="`transform: rotate(${wheelDeg}deg)`"
+      >
+        <div class="prize-list">
           <div
-            class="prize-item"
-            :style="`transform: rotate(${(360/ prizeList.length) * index}deg)`"
+            class="prize-item-wrapper"
+            v-for="(item,index) in prizeList"
+            :key="index"
           >
-            <div class="prize-name">
-              <v-chip :id="item.name">
-                <curve-text
-                  :r="5"
-                  offset="50%"
-                  :height=20
-                  :width=70
-                  :debug="false"
-                >{{ item.name }}</curve-text>
-              </v-chip>
-            </div>
-            <div class="prize-icon">
-              <img :src="item.icon" :width="item.size">
+            <div
+              class="prize-item"
+              :class="{selected: item.selected}"
+              :style="`transform: rotate(${(360/ prizeList.length) * index}deg)`"
+            >
+              <div class="prize-name">
+                <v-chip class="item-selected">
+                  <curve-text
+                    :r="5"
+                    offset="50%"
+                    :height=20
+                    :width=70
+                    :debug="false"
+                  >{{ item.name }}</curve-text>
+                </v-chip>
+              </div>
+              <div class="prize-icon">
+                <img :src="item.icon" :width="item.size">
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    </div>
+    <v-overlay absolute="absolute" :value="disabled">
+    </v-overlay>
   </v-card>
+  </div>
 </template>
 
 <script>
@@ -61,7 +66,8 @@
     },
     props:
       [
-        'items'
+        'items',
+        'disabled'
       ],
     data: () => ({
       freeze: false,
@@ -70,6 +76,11 @@
       prizeNumber: 8,
       pickedItems: [],
     }),
+  mounted() {
+    this.items.forEach((item) => {
+      item.selected = false;
+    })
+  },
   computed: {
     prizeList() {
       return this.items; //.slice(0, this.prizeNumber);
@@ -111,9 +122,9 @@
       setTimeout(() => {
         this.rolling = false;
 
-        const name = prizeList[result].name;
-        this.$emit('emotion', name);
-        document.getElementById(name).style.backgroundColor = 'black';
+        let item = prizeList[result];
+        item.selected = true;
+        this.$root.$emit('emotion', item.name);
       }, 4500);
     }
   },
@@ -211,6 +222,11 @@
   }
 
   .prize-icon {
+  }
+
+  .item-selected {
+    background-color: black;
+    color: white;
   }
 }
 

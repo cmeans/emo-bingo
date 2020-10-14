@@ -1,13 +1,15 @@
 <template>
   <v-card
     outlined
-    tile
     elevation="2"
+    style="background-color: goldenrod"
   >
   <div class="square-container">
     <div class="square" v-for="letter in 'B I N G O'.split(' ')" :key="letter">
       <BingoCell :text="letter"></BingoCell>
     </div>
+  </div>
+  <div class="square-container">
     <div class="square" v-for="row in [1,2,3,4,5]" :key="row">
       <div class="square" v-for="col in [1,2,3,4,5]" :key="col">
         <BingoCell class="cell mb-2">

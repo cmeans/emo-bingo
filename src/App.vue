@@ -34,22 +34,18 @@
         </amplify-authenticator>
       </div>
       <amplify-authenticator v-if="authState == 'signedin'">
-        <div>
-          <NewEntry/>
-        </div>
-        <EmoImages />
       </amplify-authenticator> -->
-      <v-container>
-        <v-btn v-on:click="playing = !playing">Take a Turn</v-btn>
-        <v-slide-y-transition>
-          <v-card-text v-show="playing">
-            <TakeTurn :items="items" />
-          </v-card-text>
-        </v-slide-y-transition>
-        <v-slide-x-transition>
-          <BingoCard v-if="!playing" :items="items" />
-        </v-slide-x-transition>
-      </v-container>
+        <v-container>
+          <v-btn v-on:click="playing = !playing">Take a Turn</v-btn>
+          <v-slide-y-transition>
+            <v-card-text v-show="playing">
+              <TakeTurn :items="items" />
+            </v-card-text>
+          </v-slide-y-transition>
+          <v-slide-x-transition>
+            <BingoCard v-if="!playing" :items="items" />
+          </v-slide-x-transition>
+        </v-container>
     </v-main>
   </v-app>
 </template>
