@@ -18,6 +18,13 @@
         <v-toolbar-title>emo-Bingo</v-toolbar-title>
       </div>
 
+      <v-menu>
+      </v-menu>
+      <v-btn class="ml-2">About</v-btn>
+      <v-btn class="ml-2">Instructions/Help</v-btn>
+
+      <v-spacer></v-spacer>
+      <v-btn class="ml-2" v-on:click="playing = !playing">Play</v-btn>
       <v-spacer></v-spacer>
 
       <div v-if="authState === 'signedin' && user">
@@ -36,7 +43,6 @@
       <amplify-authenticator v-if="authState == 'signedin'">
       </amplify-authenticator> -->
         <v-container>
-          <v-btn v-on:click="playing = !playing">Take a Turn</v-btn>
           <v-slide-y-transition>
             <v-card-text v-show="playing">
               <TakeTurn :items="items" />

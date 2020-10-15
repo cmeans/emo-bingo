@@ -27,7 +27,7 @@
             <v-file-input
               required
               show-size
-              :rules="[v => (!!v && v != [] && v != '') || 'Item is required']"
+              :rules="[v => (!!v && v != [] && v != '') || 'Whacky, I know, but we need a picture for this to work']"
               @change="doPreviewImage"
               v-model="imageFile"
               prepend-icon="mdi-camera"
@@ -125,7 +125,7 @@
   }
 
   .preview {
-    border: solid 1px blue;
+    border: solid 2px purple;
   }
 
   .bounce-enter-active {

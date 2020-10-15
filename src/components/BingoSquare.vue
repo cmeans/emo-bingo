@@ -1,7 +1,7 @@
 <template>
   <v-card
     outlined
-    elevation="2"
+    elevation="6"
     class="card"
   >
   <div class="square-container">
@@ -11,20 +11,29 @@
   </div>
   <div class="square-container">
     <div class="square" v-for="entry in entries" :key="entry.i">
-        <v-card class="cell mb-2">
-          <v-card-text>
-            <div align="center">
-              <div class="d-none d-md-flex justify-center">
-                {{ entry.name }}
-              </div>
-              <v-img
-                contain
-                :src="entry.icon"
-                v-bind:style="{height: size, width: size}"
-              />
+      <v-card class="cell mb-2">
+        <v-card-text>
+          <div align="center">
+            <div class="d-none d-md-flex justify-center">
+              {{ entry.name }}
             </div>
-          </v-card-text>
-        </v-card>
+            <v-img
+              contain
+              :src="entry.icon"
+              v-bind:style="{height: size, width: size}"
+            />
+          </div>
+          <v-overlay absolute="true" v-show="entry.match">
+            <v-img
+              v-show="entry.name != entry.emotion"
+              contain
+              src="/images/cross-mark.png"
+              width="100"
+            >
+            </v-img>
+          </v-overlay>
+        </v-card-text>
+      </v-card>
     </div>
     <!-- <div class="square" v-for="col in [0,1,2,3,4]" :key="col">
       <div class="square" v-for="row in [0,1,2,3,4]" :key="row">
@@ -85,7 +94,16 @@
         for (let i = 0; i < 25; i++) {
           const item = this.getRandomItem();
           this.entries.push({ i, ...item });
+          // Replace center "square" with freebie.
         }
+        this.entries[12] = {
+          i: 12,
+          name: 'freebie',
+          emotion: 'freebie',
+          icon: '/images/jack-o-lantern.png',
+          size: 64,
+          match: true
+        };
       },
       entry(row, col) {
         return this.entries[row * 5 + col];
