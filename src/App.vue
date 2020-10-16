@@ -2,15 +2,15 @@
   <v-app>
     <v-app-bar
       app
-      color="primary"
+      color="black"
       dark
     >
       <div class="d-flex align-center">
         <v-img
-          alt="Vuetify Logo"
+          alt="HERP DERP logo"
           class="shrink mr-2"
           contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          src="/images/herpderp.png"
           transition="scale-transition"
           width="40"
         />
@@ -18,14 +18,15 @@
         <v-toolbar-title>emo-Bingo</v-toolbar-title>
       </div>
 
-      <v-menu>
-      </v-menu>
-      <v-btn class="ml-2">About</v-btn>
-      <v-btn class="ml-2">Instructions/Help</v-btn>
+      <v-btn class="ml-2">
+        <v-icon>mdi-information-outline</v-icon>
+      </v-btn>
+      <v-btn class="ml-2">
+        <v-icon>mdi-help</v-icon>
+      </v-btn>
 
       <v-spacer></v-spacer>
       <v-btn class="ml-2" v-on:click="playing = !playing">Play</v-btn>
-      <v-spacer></v-spacer>
 
       <div v-if="authState === 'signedin' && user">
         <div class="d-flex align-center">
