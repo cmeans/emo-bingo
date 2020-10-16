@@ -5,6 +5,8 @@
       color="black"
       dark
     >
+      <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
+
       <div class="d-flex align-center">
         <v-img
           alt="HERP DERP logo"
@@ -35,6 +37,40 @@
         </div>
       </div>
     </v-app-bar>
+    <v-navigation-drawer
+      v-model="drawer"
+      absolute
+      temporary
+    >
+      <v-list
+        nav
+        dense
+      >
+        <v-list-item-group
+          v-model="group"
+          active-class="deep-purple--text text--accent-4"
+        >
+          <v-list-item>
+            <v-list-item-icon>
+              <v-icon>mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Home</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-icon>
+              <v-icon>mdi-help</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>help</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-icon>
+              <v-icon>mdi-information</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>About</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
     <v-main>
       <!-- <div class="d-flex justify-center">
         <amplify-authenticator v-if="authState !== 'signedin'">
@@ -98,6 +134,8 @@ export default {
   data: () => ({
     user: undefined,
     authState: undefined,
+    drawer: false,
+    group: false,
     // items: ITEMS,
     playing: false,
     playedEmotions: []
