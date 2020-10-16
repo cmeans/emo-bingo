@@ -64,7 +64,7 @@
     },
     props:
       [
-        'items',
+        'playedEmotions',
         'disabled'
       ],
     data: () => ({
@@ -75,16 +75,16 @@
       pickedItems: [],
     }),
   mounted() {
-    this.items.forEach((item) => {
-      item.selected = false;
-    })
+    // this.items.forEach((item) => {
+    //   item.selected = false;
+    // })
   },
   computed: {
     prizeList() {
-      return this.items; //.slice(0, this.prizeNumber);
+      return this.playedEmotions; //.slice(0, this.prizeNumber);
     },
     done() {
-      return (this.pickedItems.length == this.items.length);
+      return (this.pickedItems.length == this.playedEmotions.length);
     },
     spinnerDisabled() {
       return (this.done || this.rolling || this.disabled);

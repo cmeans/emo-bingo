@@ -45,11 +45,11 @@
         <v-container>
           <v-slide-y-transition>
             <v-card-text v-show="playing">
-              <TakeTurn :items="items" />
+              <TakeTurn :playedEmotions="playedEmotions" />
             </v-card-text>
           </v-slide-y-transition>
           <v-slide-x-transition>
-            <BingoCard v-if="!playing" :items="items" />
+            <BingoCard v-if="!playing" :playedEmotions="playedEmotions" />
           </v-slide-x-transition>
         </v-container>
     </v-main>
@@ -62,17 +62,19 @@ import { onAuthUIStateChange } from '@aws-amplify/ui-components';
 // import EmoImages from './components/EmoImages';
 import BingoCard from './components/BingoSquare';
 import TakeTurn from './components/TakeTurn';
+import { emotionInfo } from './main';
+
 // import Spinner from './components/Spinner';
 
-const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
+// const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
 
-const ITEMS = EMOTIONS.map((value) => {
-  return {
-    icon: `/images/emotions/${value}-tight.png`,
-    size: 50,
-    name: value
-  }
-})
+// const ITEMS = EMOTIONS.map((value) => {
+//   return {
+//     icon: `/images/emotions/${value}-tight.png`,
+//     size: 50,
+//     name: value
+//   }
+// })
 
 export default {
   name: 'App',
@@ -88,16 +90,30 @@ export default {
     onAuthUIStateChange((authState, authData) => {
       this.authState = authState;
       this.user = authData;
-    })
+    });
+
+    this.initPlayedEmotions();
   },
   data: () => ({
     user: undefined,
     authState: undefined,
-    items: ITEMS,
-    playing: false
+    // items: ITEMS,
+    playing: false,
+    playedEmotions: []
   }),
   beforeDestroy() {
     return onAuthUIStateChange;
+  },
+  methods: {
+    initPlayedEmotions() {
+      emotionInfo.forEach((value) => {
+        this.playedEmotions.push(
+          {
+            selected: false,
+            ...value
+          });
+      })
+    }
   }
 };
 </script>

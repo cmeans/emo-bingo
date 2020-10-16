@@ -12,8 +12,24 @@ Vue.use(VueResizeText);
 
 Vue.config.productionTip = false
 
+const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
+
+const emotionInfo =
+  new Map(
+    EMOTIONS.map((value) =>
+    [
+      value,
+      {
+        icon: `/images/emotions/${value}-tight.png`,
+        size: 50,
+        name: value
+      }
+    ]));
+
 new Vue({
   vuetify,
   render: h => h(App)
 }).$mount('#app')
+
+export { emotionInfo };
 

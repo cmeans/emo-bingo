@@ -11,7 +11,7 @@
   </div>
   <div class="square-container">
     <div class="square" v-for="entry in entries" :key="entry.i">
-      <v-card class="cell mb-2">
+      <v-card class="cell mb-2" @click="showCellInfoDialog(entry.name)">
         <v-card-text>
           <div align="center">
             <div class="d-none d-md-flex justify-center">
@@ -23,7 +23,7 @@
               v-bind:style="{height: size, width: size}"
             />
           </div>
-          <v-overlay absolute="true" v-show="entry.match">
+          <v-overlay :absolute="true" v-show="entry.match">
             <v-img
               v-show="entry.name != entry.emotion"
               contain
@@ -54,25 +54,34 @@
       </div>
     </div> -->
   </div>
+  <CellInfo v-model="showCellInfo" :emotion="showEmotion" />
   </v-card>
 </template>
 
 <script>
   import BingoCell from './BingoCell';
+  import CellInfo from './CellInfo';
+  import { emotionInfo } from '../main';
 
   export default {
     name: 'BingoCard',
 
     components: {
-      BingoCell
+      BingoCell,
+      CellInfo
     },
     props: [
-      'items'
+      'playedEmotions'
     ],
     data: () => ({
-      entries: []
+      entries: [],
+      emotions: [],
+      emotionNames: [String],
+      showEmotion: null,
+      showCellInfo: null
     }),
     created() {
+      this.initEmotionNames();
       this.initBingoCardCells();
     },
     computed: {
@@ -88,7 +97,10 @@
     },
     methods: {
       getRandomItem() {
-        return this.items[Math.floor(Math.random() * this.items.length)];
+        return this.playedEmotions[Math.floor(Math.random() * this.playedEmotions.length)];
+      },
+      initEmotionNames() {
+        this.emotionNames = emotionInfo.keys();
       },
       initBingoCardCells() {
         for (let i = 0; i < 25; i++) {
@@ -107,6 +119,10 @@
       },
       entry(row, col) {
         return this.entries[row * 5 + col];
+      },
+      showCellInfoDialog(emotion) {
+        this.showEmotion = emotion;
+        this.showCellInfo = true;
       }
     }
   }

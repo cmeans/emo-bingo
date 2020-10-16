@@ -16,7 +16,7 @@
                   1. Take a spin
                 </h2>
               </transition>
-            <SpinningWheel :items="items" :disabled="emotion != ''"/>
+            <SpinningWheel :playedEmotions="playedEmotions" :disabled="emotion != ''"/>
           </v-col>
           <v-col cols="12" lg="4" class="text-center" v-show="emotion">
               <transition name="bounce">
@@ -37,6 +37,9 @@
               text-align="middle"
             >
             </v-file-input>
+            <h3>
+              (Try to look {{ emotion }})
+            </h3>
           </v-col>
           <v-col cols="12" lg="4" class="text-center" v-show="previewImage">
             <h2 class="mb-4">
@@ -76,7 +79,7 @@
       SpinningWheel
     },
     props: [
-      'items'
+      'playedEmotions'
     ],
     data: () => ({
       emotion: '',
@@ -89,9 +92,9 @@
       getPreviewImageUrl() {
         return this.previewImage;
       },
-      showBounce() {
-        return true;
-      },
+      // showBounce() {
+      //   return true;
+      // },
       step2() {
         if (this.emotion != '') {
           return 'bounce';
