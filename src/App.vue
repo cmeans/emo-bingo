@@ -2,6 +2,8 @@
   <v-app>
     <v-app-bar
       app
+      fixed
+      elevate-on-scroll
       color="black"
       dark
     >
@@ -71,7 +73,7 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-    <v-main>
+    <v-main class="mt-20">
       <!-- <div class="d-flex justify-center">
         <amplify-authenticator v-if="authState !== 'signedin'">
           <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
@@ -90,6 +92,9 @@
           </v-slide-x-transition>
         </v-container>
     </v-main>
+    <v-footer>
+      &copy; <span>2020</span> <a href="mailto:cmeans@enova.com">Chris Means</a>
+    </v-footer>
   </v-app>
 </template>
 
