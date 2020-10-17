@@ -4,12 +4,11 @@
     elevation="6"
   >
     <v-card-title>
-      About emo-Bingo
+      Help / Instructions
     </v-card-title>
     <v-card-text>
       <ol>
         <li>
-          Conceived, designed and developed for Enova HERP DERP 2020.
         </li>
         <li>
         </li>
@@ -20,7 +19,7 @@
 
 <script>
   export default {
-    name: 'About',
+    name: 'Help',
 
     components: {
     },
