@@ -11,6 +11,7 @@
         class="wheel-pointer"
         v-on:click="onClickRotate"
         :disabled="spinnerDisabled"
+        elevation="0"
       >
         Spin
       </v-btn>
@@ -145,7 +146,7 @@
 }
 </script>
 
-<style type="text/scss" scoped>
+<style lang="scss" scoped>
 .wheel-wrapper {
   width: 300px;
   height: 300px;
@@ -162,20 +163,22 @@
   transform: translate(-50%, -50%);
   /* line-height: 60px; */
   z-index: 10;
-  /* width: 60px;
+  /*
+  width: 60px;
   height: 60px;
   border-radius: 1000px;
-  background: yellow;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   line-height: 60px;
-  z-index: 10; */
+  z-index: 10;
   cursor: pointer;
+  */
 
-  /* &::after {
+  /*
+  &::after {
     content: "";
     position: absolute;
     top: -32px;
@@ -184,7 +187,8 @@
     border-style: solid;
     border-color: transparent transparent yellow;
     transform: translateX(-50%);
-  } */
+  }
+  */
 }
 .wheel-bg {
   width: 100%;
@@ -221,9 +225,9 @@
   height: 100%;
   transform-origin: bottom;
 
-  .prize-name {
-    padding: 16px 0;
-  }
+  // .prize-name {
+  //   padding: 16px 0;
+  // }
 
   .prize-icon {
   }

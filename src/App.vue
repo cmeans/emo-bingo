@@ -30,19 +30,11 @@
         </div>
       </div>
     </v-app-bar>
-    <v-main>
-      <!-- <div class="d-flex justify-center">
-        <amplify-authenticator v-if="authState !== 'signedin'">
-          <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
-        </amplify-authenticator>
-      </div>
-      <amplify-authenticator v-if="authState == 'signedin'">
-      </amplify-authenticator> -->
-      <router-view/>
-    </v-main>
     <v-navigation-drawer
       v-model="drawer"
-      absolute
+      _absolute
+      app
+      fixed
       temporary
     >
       <v-list-item>
@@ -92,6 +84,16 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
+    <v-main>
+      <!-- <div class="d-flex justify-center">
+        <amplify-authenticator v-if="authState !== 'signedin'">
+          <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
+        </amplify-authenticator>
+      </div>
+      <amplify-authenticator v-if="authState == 'signedin'">
+      </amplify-authenticator> -->
+      <router-view/>
+    </v-main>
   </v-app>
 </template>
 
