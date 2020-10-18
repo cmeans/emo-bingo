@@ -1,7 +1,7 @@
 <template>
   <div class="instructions">
     <v-card
-      class="mx-auto ma-4"
+      class="mx-auto ma-6"
       min-width="50%"
       max-width="80%"
       elevation="6"
@@ -13,10 +13,13 @@
         almost, but not quite entirely unlike Bingo
       </v-card-subtitle>
       <v-card-text class="text-left">
-        <v-list>
+        <v-list
+          width="90%"
+        >
           <v-list-item
             v-for="(text, index) in instructions"
-            :key="index">
+            :key="index"
+          >
             <v-list-item-content>
               <v-list-item-title v-text="text" />
             </v-list-item-content>
@@ -34,7 +37,9 @@
         Under-the-Hood
       </v-card-title>
       <v-card-text class="text-left">
-        <v-list>
+        <v-list
+          width="90%"
+        >
           <v-list-item
             v-for="(text, index) in underTheHood"
             :key="index">
@@ -80,3 +85,9 @@
     }
   }
 </script>
+
+<style lang="scss" scoped>
+  .v-list-item__title {
+    white-space: normal;
+  }
+</style>

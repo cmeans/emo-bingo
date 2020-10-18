@@ -21,7 +21,16 @@
 
         <v-toolbar-title>emo-Bingo</v-toolbar-title>
       </div>
-      <v-btn class="ml-2" v-on:click="$root.$emit('take-a-turn')">Play</v-btn>
+
+      <v-btn
+        class="ml-2"
+        v-if="authState === 'signedin' && user && $router.currentRoute.path == '/'"
+        v-on:click="$root.$emit('take-a-turn')"
+      >
+        Play
+      </v-btn>
+
+      <v-spacer></v-spacer>
 
       <div v-if="authState === 'signedin' && user">
         <div class="d-flex align-center">
@@ -85,13 +94,6 @@
       </v-list>
     </v-navigation-drawer>
     <v-main>
-      <!-- <div class="d-flex justify-center">
-        <amplify-authenticator v-if="authState !== 'signedin'">
-          <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
-        </amplify-authenticator>
-      </div>
-      <amplify-authenticator v-if="authState == 'signedin'">
-      </amplify-authenticator> -->
       <router-view/>
     </v-main>
   </v-app>

@@ -10,6 +10,12 @@
       "StackName": "amplify-emobingo-dev-140703",
       "StackId": "arn:aws:cloudformation:us-east-2:315675977921:stack/amplify-emobingo-dev-140703/1cdbe130-1175-11eb-8662-0224304fe6fa",
       "AmplifyAppId": "d2muahvsjx7x83"
+    },
+    "categories": {
+      "auth": {
+        "emobingof6d3e6c9": {},
+        "emobingoa4a71fe8": {}
+      }
     }
   }
 }
