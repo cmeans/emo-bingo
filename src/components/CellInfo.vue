@@ -11,9 +11,7 @@
             :src="emotionData.icon"
           />
         </v-card-title>
-        <v-card-text>
-          You'll need to take a selfie exhibiting the emotion: <strong>{{ emotion }}</strong>
-        </v-card-text>
+        <v-card-text v-html="message()" />
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
@@ -29,7 +27,7 @@
 </template>
 
 <script>
-  import { emotionInfo } from '../main';
+  import { EMOTION_INFO } from '../main';
 
   export default {
     name: 'CellInfo',
@@ -41,7 +39,7 @@
       value: Boolean
     },
     data: () => ({
-      emotions: emotionInfo
+      // emotions: EMOTION_INFO
     }),
     computed: {
       show: {
@@ -55,7 +53,14 @@
     },
     methods: {
       emotionData() {
-        return emotionInfo[this.emotion];
+        return EMOTION_INFO[this.emotion];
+      },
+      message() {
+        if (this.emotion == 'freebie') {
+          return "This is the center square...it's a <strong>freebie</strong>!";
+        } else {
+          return `You'll need to take a selfie exhibiting the emotion: <strong>${this.emotion}</strong>`
+        }
       }
     }
   }

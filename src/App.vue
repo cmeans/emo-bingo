@@ -21,16 +21,7 @@
 
         <v-toolbar-title>emo-Bingo</v-toolbar-title>
       </div>
-
-      <v-btn class="ml-2">
-        <v-icon>mdi-information-outline</v-icon>
-      </v-btn>
-      <v-btn class="ml-2">
-        <v-icon>mdi-help</v-icon>
-      </v-btn>
-
-      <v-spacer></v-spacer>
-      <v-btn class="ml-2" v-on:click="playing = !playing">Play</v-btn>
+      <v-btn class="ml-2" v-on:click="$root.$emit('take-a-turn')">Play</v-btn>
 
       <div v-if="authState === 'signedin' && user">
         <div class="d-flex align-center">
@@ -39,32 +30,60 @@
         </div>
       </div>
     </v-app-bar>
+    <v-main>
+      <!-- <div class="d-flex justify-center">
+        <amplify-authenticator v-if="authState !== 'signedin'">
+          <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
+        </amplify-authenticator>
+      </div>
+      <amplify-authenticator v-if="authState == 'signedin'">
+      </amplify-authenticator> -->
+      <router-view/>
+    </v-main>
     <v-navigation-drawer
       v-model="drawer"
       absolute
       temporary
     >
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title class="title">
+            emo-Bingo
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            Emotional Bingo
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider></v-divider>
+
       <v-list
         nav
         dense
       >
         <v-list-item-group
-          v-model="group"
           active-class="deep-purple--text text--accent-4"
         >
-          <v-list-item>
+          <v-list-item
+            @click="$router.push({ path: '/' }).catch(err => {})"
+          >
             <v-list-item-icon>
               <v-icon>mdi-home</v-icon>
             </v-list-item-icon>
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item>
-          <v-list-item>
+          <v-list-item
+            @click="$router.push({ path: '/instructions' }).catch(err => {})"
+          >
             <v-list-item-icon>
               <v-icon>mdi-help</v-icon>
             </v-list-item-icon>
-            <v-list-item-title>help</v-list-item-title>
+            <v-list-item-title>Instructions</v-list-item-title>
           </v-list-item>
-          <v-list-item>
+          <v-list-item
+            @click="$router.push({ path: '/about' }).catch(err => {})"
+          >
             <v-list-item-icon>
               <v-icon>mdi-information</v-icon>
             </v-list-item-icon>
@@ -73,91 +92,52 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-    <v-main class="mt-20">
-      <!-- <div class="d-flex justify-center">
-        <amplify-authenticator v-if="authState !== 'signedin'">
-          <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
-        </amplify-authenticator>
-      </div>
-      <amplify-authenticator v-if="authState == 'signedin'">
-      </amplify-authenticator> -->
-        <v-container>
-          <v-slide-y-transition>
-            <v-card-text v-show="playing">
-              <TakeTurn :playedEmotions="playedEmotions" />
-            </v-card-text>
-          </v-slide-y-transition>
-          <v-slide-x-transition>
-            <BingoCard v-if="!playing" :playedEmotions="playedEmotions" />
-          </v-slide-x-transition>
-        </v-container>
-    </v-main>
-    <v-footer>
-      &copy; <span>2020</span> <a href="mailto:cmeans@enova.com">Chris Means</a>
-    </v-footer>
   </v-app>
 </template>
 
 <script>
 import { onAuthUIStateChange } from '@aws-amplify/ui-components';
-// import NewEntry from './components/NewEntry';
-// import EmoImages from './components/EmoImages';
-import BingoCard from './components/BingoSquare';
-import TakeTurn from './components/TakeTurn';
-import { emotionInfo } from './main';
-
-// import Spinner from './components/Spinner';
-
-// const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
-
-// const ITEMS = EMOTIONS.map((value) => {
-//   return {
-//     icon: `/images/emotions/${value}-tight.png`,
-//     size: 50,
-//     name: value
-//   }
-// })
 
 export default {
   name: 'App',
-
-  components: {
-    // NewEntry,
-    // EmoImages,
-    BingoCard,
-    TakeTurn
-  },
 
   created() {
     onAuthUIStateChange((authState, authData) => {
       this.authState = authState;
       this.user = authData;
     });
-
-    this.initPlayedEmotions();
   },
-  data: () => ({
-    user: undefined,
-    authState: undefined,
-    drawer: false,
-    group: false,
-    // items: ITEMS,
-    playing: false,
-    playedEmotions: []
-  }),
+  data() {
+    return {
+      user: undefined,
+      authState: undefined,
+      drawer: false
+    }
+  },
   beforeDestroy() {
     return onAuthUIStateChange;
-  },
-  methods: {
-    initPlayedEmotions() {
-      emotionInfo.forEach((value) => {
-        this.playedEmotions.push(
-          {
-            selected: false,
-            ...value
-          });
-      })
+  }
+}
+</script>
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+
+  a {
+    font-weight: bold;
+    color: #2c3e50;
+
+    &.router-link-exact-active {
+      color: #42b983;
     }
   }
-};
-</script>
+}
+</style>

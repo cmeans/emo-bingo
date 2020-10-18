@@ -4,10 +4,8 @@ import vuetify from './plugins/vuetify';
 import '@aws-amplify/ui-vue';
 // import Amplify from 'aws-amplify';
 // import config from './aws-exports';
-import Home from './components/About.vue';
-import About from './components/About.vue';
-import Help from './components/Help.vue';
 import VueResizeText from 'vue-resize-text';
+import router from './router';
 
 Vue.use(VueResizeText);
 
@@ -15,17 +13,11 @@ Vue.use(VueResizeText);
 
 Vue.config.productionTip = false
 
-const routes = [
-  { path:'/', component: Home },
-  { path:'/help', component: Help },
-  { path:'/about', component: About },
-]
+const EMOTIONS_LIST = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
 
-const EMOTIONS = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
-
-const emotionInfo =
+const EMOTION_INFO =
   new Map(
-    EMOTIONS.map((value) =>
+    EMOTIONS_LIST.map((value) =>
     [
       value,
       {
@@ -37,9 +29,8 @@ const emotionInfo =
 
 new Vue({
   vuetify,
-  router: new ({ routes }),
+  router,
   render: h => h(App)
 }).$mount('#app')
 
-export { emotionInfo };
-
+export { EMOTIONS_LIST, EMOTION_INFO };

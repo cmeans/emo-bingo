@@ -2,7 +2,7 @@
   <v-card
     outlined
     elevation="6"
-    class="card"
+    class="card ma-4"
   >
   <div class="square-container">
     <div class="square" v-for="letter in 'B I N G O'.split(' ')" :key="letter">
@@ -20,7 +20,7 @@
             <v-img
               contain
               :src="entry.icon"
-              v-bind:style="{height: size, width: size}"
+              v-bind:style="{ width: size }"
             />
           </div>
           <v-overlay :absolute="true" v-show="entry.match">
@@ -61,10 +61,10 @@
 <script>
   import BingoCell from './BingoCell';
   import CellInfo from './CellInfo';
-  import { emotionInfo } from '../main';
+  import { EMOTIONS_LIST, EMOTION_INFO } from '../main';
 
   export default {
-    name: 'BingoCard',
+    name: 'BingoSquare',
 
     components: {
       BingoCell,
@@ -76,12 +76,12 @@
     data: () => ({
       entries: [],
       emotions: [],
-      emotionNames: [String],
+      // emotionNames: [String],
       showEmotion: null,
       showCellInfo: null
     }),
     created() {
-      this.initEmotionNames();
+      // this.initEmotionNames();
       this.initBingoCardCells();
     },
     computed: {
@@ -96,24 +96,25 @@
       }
     },
     methods: {
-      getRandomItem() {
-        return this.playedEmotions[Math.floor(Math.random() * this.playedEmotions.length)];
+      getRandomEmotionName() {
+        return EMOTIONS_LIST[Math.floor(Math.random() * EMOTIONS_LIST.length)];
       },
-      initEmotionNames() {
-        this.emotionNames = emotionInfo.keys();
-      },
+      // initEmotionNames() {
+      //   this.emotionNames = Array.from(emotionInfo.keys());
+      // },
       initBingoCardCells() {
         for (let i = 0; i < 25; i++) {
-          const item = this.getRandomItem();
+          const emotionName = this.getRandomEmotionName();
+          const item = EMOTION_INFO.get(emotionName);
           this.entries.push({ i, ...item });
-          // Replace center "square" with freebie.
         }
-        this.entries[12] = {
+
+      this.entries[12] = {
           i: 12,
           name: 'freebie',
           emotion: 'freebie',
           icon: '/images/jack-o-lantern.png',
-          size: 64,
+          size: 164,
           match: true
         };
       },
