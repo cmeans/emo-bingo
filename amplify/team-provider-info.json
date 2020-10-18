@@ -1,20 +1,26 @@
 {
-  "dev": {
-    "awscloudformation": {
-      "AuthRoleName": "amplify-emobingo-dev-170058-authRole",
-      "UnauthRoleArn": "arn:aws:iam::315675977921:role/amplify-emobingo-dev-170058-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::315675977921:role/amplify-emobingo-dev-170058-authRole",
-      "Region": "us-east-2",
-      "DeploymentBucketName": "amplify-emobingo-dev-170058-deployment",
-      "UnauthRoleName": "amplify-emobingo-dev-170058-unauthRole",
-      "StackName": "amplify-emobingo-dev-170058",
-      "StackId": "arn:aws:cloudformation:us-east-2:315675977921:stack/amplify-emobingo-dev-170058/6f88f680-118d-11eb-b5b7-020a87833dea",
-      "AmplifyAppId": "d36kmdo1bqjtng"
-    },
-    "categories": {
-      "auth": {
-        "emobingo01334f5f": {}
-      }
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-emobingo-dev-170058-authRole",
+            "UnauthRoleArn": "arn:aws:iam::315675977921:role/amplify-emobingo-dev-170058-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::315675977921:role/amplify-emobingo-dev-170058-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-emobingo-dev-170058-deployment",
+            "UnauthRoleName": "amplify-emobingo-dev-170058-unauthRole",
+            "StackName": "amplify-emobingo-dev-170058",
+            "StackId": "arn:aws:cloudformation:us-east-2:315675977921:stack/amplify-emobingo-dev-170058/6f88f680-118d-11eb-b5b7-020a87833dea",
+            "AmplifyAppId": "d36kmdo1bqjtng"
+        },
+        "categories": {
+            "auth": {
+                "emobingo01334f5f": {}
+            },
+            "hosting": {
+                "amplifyhosting": {
+                    "appId": "d36kmdo1bqjtng",
+                    "type": "cicd"
+                }
+            }
+        }
     }
-  }
 }
