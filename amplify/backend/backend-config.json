@@ -13,5 +13,29 @@
       "type": "cicd",
       "lastPushTimeStamp": "2020-10-18T22:16:37.453Z"
     }
+  },
+  "function": {
+    "S3Trigger61407f07": {
+      "service": "Lambda",
+      "providerPlugin": "awscloudformation",
+      "build": true
+    }
+  },
+  "storage": {
+    "emobiingos3sstorage": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "S3Trigger61407f07",
+          "attributes": [
+            "Name",
+            "Arn",
+            "LambdaExecutionRole"
+          ]
+        }
+      ]
+    }
   }
 }
