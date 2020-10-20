@@ -15,7 +15,6 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            text
             @click="show = false"
           >
             Got It

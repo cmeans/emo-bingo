@@ -1,12 +1,19 @@
 <template>
   <div>
     <v-slide-y-transition>
-      <v-card-text v-show="playing">
+      <v-card-text v-show="turnActive">
         <TakeTurn :playedEmotions="availableEmotions" />
       </v-card-text>
     </v-slide-y-transition>
     <v-slide-x-transition>
-      <BingoSquare v-show="!playing" :gameState="state" />
+      <div v-show="!turnActive">
+        <v-btn
+          @click="turnActive = !turnActive"
+        >
+          Take your Turn
+        </v-btn>
+        <BingoSquare :gameState="state" />
+      </div>
     </v-slide-x-transition>
   </div>
 </template>
@@ -25,7 +32,19 @@ export default {
   },
   created() {
     this.$root.$on('take-a-turn', () => {
-      this.playing = !this.playing;
+      this.turnActive = !this.turnActive;
+    });
+    this.$root.$on('turn-complete', (emotion) => {
+      this.emotion = emotion;
+      this.turnActive = false;
+      this.availableEmotions.forEach((value) => {
+        if (value.name == this.emotion) {
+          value.selected = true;
+          console.log(value)
+          return true;
+        }
+      });
+      console.log(this.availableEmotions);
     });
 
     this.initGameState();
@@ -33,7 +52,7 @@ export default {
   },
   data() {
     return {
-      playing: false,
+      turnActive: false,
       availableEmotions: [],
       state: []
     }

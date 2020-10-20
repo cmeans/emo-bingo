@@ -64,13 +64,28 @@
       </div>
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn :disabled="!previewImage">Submit Selfie</v-btn>
+      <v-btn
+        :disabled="!previewImage"
+        @click="submitSelfie"
+      >
+        Submit Selfie
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
   import SpinningWheel from './SpinningWheel';
+
+  function getDefaultData() {
+    return {
+      emotion: '',
+      imageFile: [],
+      previewImage: '',
+      showBounce: false,
+      step3: ''
+    };
+  }
 
   export default {
     name: 'TakeTurn',
@@ -81,13 +96,14 @@
     props: [
       'playedEmotions'
     ],
-    data: () => ({
-      emotion: '',
-      imageFile: [],
-      previewImage: '',
-      showBounce: false,
-      step3: ''
-    }),
+    data: () => {
+      return getDefaultData();
+    },
+    mounted() {
+      this.$root.$on('emotion', (text) => {
+        this.emotion = text;
+      });
+    },
     computed: {
       getPreviewImageUrl() {
         return this.previewImage;
@@ -113,12 +129,19 @@
         } else {
           this.previewImage = URL.createObjectURL(file);
         }
+      },
+      resetData() {
+        const def = getDefaultData();
+        for (const [key, value] of Object.entries(def)) {
+          this.$data[key] = value;
+        }
+      },
+      submitSelfie() {
+        this.$root.$emit(
+          'turn-complete',
+          this.emotion);
+        this.resetData();
       }
-    },
-    mounted() {
-      this.$root.$on('emotion', (text) => {
-        this.emotion = text;
-      });
     }
   }
 </script>
