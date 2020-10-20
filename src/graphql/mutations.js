@@ -1,60 +1,213 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const createEntry = /* GraphQL */ `
-  mutation CreateEntry(
-    $input: CreateEntryInput!
-    $condition: ModelEntryConditionInput
+export const createGame = /* GraphQL */ `
+  mutation CreateGame(
+    $input: CreateGameInput!
+    $condition: ModelGameConditionInput
   ) {
-    createEntry(input: $input, condition: $condition) {
+    createGame(input: $input, condition: $condition) {
       id
-      name
-      note
-      image
-      faces
-      emotions
-      emotion
-      confidence
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
       createdAt
       updatedAt
       owner
     }
   }
 `;
-export const updateEntry = /* GraphQL */ `
-  mutation UpdateEntry(
-    $input: UpdateEntryInput!
-    $condition: ModelEntryConditionInput
+export const updateGame = /* GraphQL */ `
+  mutation UpdateGame(
+    $input: UpdateGameInput!
+    $condition: ModelGameConditionInput
   ) {
-    updateEntry(input: $input, condition: $condition) {
+    updateGame(input: $input, condition: $condition) {
       id
-      name
-      note
-      image
-      faces
-      emotions
-      emotion
-      confidence
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
       createdAt
       updatedAt
       owner
     }
   }
 `;
-export const deleteEntry = /* GraphQL */ `
-  mutation DeleteEntry(
-    $input: DeleteEntryInput!
-    $condition: ModelEntryConditionInput
+export const deleteGame = /* GraphQL */ `
+  mutation DeleteGame(
+    $input: DeleteGameInput!
+    $condition: ModelGameConditionInput
   ) {
-    deleteEntry(input: $input, condition: $condition) {
+    deleteGame(input: $input, condition: $condition) {
       id
-      name
-      note
-      image
-      faces
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const createImage = /* GraphQL */ `
+  mutation CreateImage(
+    $input: CreateImageInput!
+    $condition: ModelImageConditionInput
+  ) {
+    createImage(input: $input, condition: $condition) {
+      id
+      title
+      fileName
       emotions
-      emotion
-      confidence
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const updateImage = /* GraphQL */ `
+  mutation UpdateImage(
+    $input: UpdateImageInput!
+    $condition: ModelImageConditionInput
+  ) {
+    updateImage(input: $input, condition: $condition) {
+      id
+      title
+      fileName
+      emotions
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const deleteImage = /* GraphQL */ `
+  mutation DeleteImage(
+    $input: DeleteImageInput!
+    $condition: ModelImageConditionInput
+  ) {
+    deleteImage(input: $input, condition: $condition) {
+      id
+      title
+      fileName
+      emotions
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const createStats = /* GraphQL */ `
+  mutation CreateStats(
+    $input: CreateStatsInput!
+    $condition: ModelStatsConditionInput
+  ) {
+    createStats(input: $input, condition: $condition) {
+      id
+      wins
+      losses
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const updateStats = /* GraphQL */ `
+  mutation UpdateStats(
+    $input: UpdateStatsInput!
+    $condition: ModelStatsConditionInput
+  ) {
+    updateStats(input: $input, condition: $condition) {
+      id
+      wins
+      losses
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const deleteStats = /* GraphQL */ `
+  mutation DeleteStats(
+    $input: DeleteStatsInput!
+    $condition: ModelStatsConditionInput
+  ) {
+    deleteStats(input: $input, condition: $condition) {
+      id
+      wins
+      losses
       createdAt
       updatedAt
       owner

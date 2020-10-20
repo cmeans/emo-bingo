@@ -10,16 +10,16 @@
     </div>
   </div>
   <div class="square-container">
-    <div class="square" v-for="entry in entries" :key="entry.i">
-      <v-card class="cell mb-2" @click="showCellInfoDialog(entry.name)">
-        <v-card-text>
+    <div class="square" v-for="(entry, index) in gameState" :key="index">
+      <v-card class="cell" @click="showCellInfoDialog(entry.name)">
+        <v-card-text class="pa-0 pt-2 pb-2">
           <div align="center">
             <div class="d-none d-md-flex justify-center">
               {{ entry.name }}
             </div>
             <v-img
               contain
-              :src="entry.icon"
+              :src="emotionIcons[entry.name].icon"
               v-bind:style="{ width: size }"
             />
           </div>
@@ -35,24 +35,6 @@
         </v-card-text>
       </v-card>
     </div>
-    <!-- <div class="square" v-for="col in [0,1,2,3,4]" :key="col">
-      <div class="square" v-for="row in [0,1,2,3,4]" :key="row">
-        <v-card class="cell mb-2">
-          <v-card-text>
-            <div align="center">
-              <div class="d-none d-md-flex justify-center">
-                {{ entry[parseInt(row)*5].name }}
-              </div>
-              <v-img
-                contain
-                src="entries[(row * 5) + col].icon"
-                v-bind:style="{height: size, width: size}"
-              />
-            </div>
-          </v-card-text>
-        </v-card>
-      </div>
-    </div> -->
   </div>
   <CellInfo v-model="showCellInfo" :emotion="showEmotion" />
   </v-card>
@@ -61,7 +43,7 @@
 <script>
   import BingoCell from './BingoCell';
   import CellInfo from './CellInfo';
-  import { EMOTIONS_LIST, EMOTION_INFO } from '../main';
+  import { emotionIcons } from '../main';
 
   export default {
     name: 'BingoSquare',
@@ -71,18 +53,17 @@
       CellInfo
     },
     props: [
-      'playedEmotions'
+      'playedEmotions',
+      'gameState'
     ],
     data: () => ({
-      entries: [],
-      emotions: [],
-      // emotionNames: [String],
+      emotionIcons,
       showEmotion: null,
       showCellInfo: null
     }),
     created() {
       // this.initEmotionNames();
-      this.initBingoCardCells();
+      // this.initBingoCardCells();
     },
     computed: {
       size() {
@@ -96,31 +77,9 @@
       }
     },
     methods: {
-      getRandomEmotionName() {
-        return EMOTIONS_LIST[Math.floor(Math.random() * EMOTIONS_LIST.length)];
-      },
-      // initEmotionNames() {
-      //   this.emotionNames = Array.from(emotionInfo.keys());
+      // entry(row, col) {
+      //   return this.gameState[row * 5 + col];
       // },
-      initBingoCardCells() {
-        for (let i = 0; i < 25; i++) {
-          const emotionName = this.getRandomEmotionName();
-          const item = EMOTION_INFO.get(emotionName);
-          this.entries.push({ i, ...item });
-        }
-
-      this.entries[12] = {
-          i: 12,
-          name: 'freebie',
-          emotion: 'freebie',
-          icon: '/images/jack-o-lantern.png',
-          size: 164,
-          match: true
-        };
-      },
-      entry(row, col) {
-        return this.entries[row * 5 + col];
-      },
       showCellInfoDialog(emotion) {
         this.showEmotion = emotion;
         this.showCellInfo = true;
@@ -128,6 +87,7 @@
     }
   }
 </script>
+
 <style scoped>
   .card {
     background-color: goldenrod;

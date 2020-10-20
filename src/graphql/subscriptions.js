@@ -1,51 +1,186 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const onCreateEntry = /* GraphQL */ `
-  subscription OnCreateEntry($owner: String!) {
-    onCreateEntry(owner: $owner) {
+export const onCreateGame = /* GraphQL */ `
+  subscription OnCreateGame($owner: String!) {
+    onCreateGame(owner: $owner) {
       id
-      name
-      note
-      image
-      faces
-      emotions
-      emotion
-      confidence
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
       createdAt
       updatedAt
       owner
     }
   }
 `;
-export const onUpdateEntry = /* GraphQL */ `
-  subscription OnUpdateEntry($owner: String!) {
-    onUpdateEntry(owner: $owner) {
+export const onUpdateGame = /* GraphQL */ `
+  subscription OnUpdateGame($owner: String!) {
+    onUpdateGame(owner: $owner) {
       id
-      name
-      note
-      image
-      faces
-      emotions
-      emotion
-      confidence
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
       createdAt
       updatedAt
       owner
     }
   }
 `;
-export const onDeleteEntry = /* GraphQL */ `
-  subscription OnDeleteEntry($owner: String!) {
-    onDeleteEntry(owner: $owner) {
+export const onDeleteGame = /* GraphQL */ `
+  subscription OnDeleteGame($owner: String!) {
+    onDeleteGame(owner: $owner) {
       id
-      name
-      note
-      image
-      faces
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onCreateImage = /* GraphQL */ `
+  subscription OnCreateImage($owner: String!) {
+    onCreateImage(owner: $owner) {
+      id
+      title
+      fileName
       emotions
-      emotion
-      confidence
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onUpdateImage = /* GraphQL */ `
+  subscription OnUpdateImage($owner: String!) {
+    onUpdateImage(owner: $owner) {
+      id
+      title
+      fileName
+      emotions
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onDeleteImage = /* GraphQL */ `
+  subscription OnDeleteImage($owner: String!) {
+    onDeleteImage(owner: $owner) {
+      id
+      title
+      fileName
+      emotions
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onCreateStats = /* GraphQL */ `
+  subscription OnCreateStats {
+    onCreateStats {
+      id
+      wins
+      losses
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onUpdateStats = /* GraphQL */ `
+  subscription OnUpdateStats {
+    onUpdateStats {
+      id
+      wins
+      losses
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const onDeleteStats = /* GraphQL */ `
+  subscription OnDeleteStats {
+    onDeleteStats {
+      id
+      wins
+      losses
       createdAt
       updatedAt
       owner

@@ -8,10 +8,10 @@
       <v-card>
         <v-card-title class="headline">
           <v-img
-            :src="emotionData.icon"
+            :src="icon"
           />
         </v-card-title>
-        <v-card-text v-html="message()" />
+        <v-card-text v-html="message" />
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
@@ -27,19 +27,17 @@
 </template>
 
 <script>
-  import { EMOTION_INFO } from '../main';
+  import { emotionIcons } from '../main';
 
   export default {
     name: 'CellInfo',
 
-    components: {
-    },
     props: {
       emotion: String,
       value: Boolean
     },
     data: () => ({
-      // emotions: EMOTION_INFO
+      icons: emotionIcons
     }),
     computed: {
       show: {
@@ -49,11 +47,11 @@
         set (value) {
           this.$emit('input', value)
         }
-      }
-    },
-    methods: {
-      emotionData() {
-        return EMOTION_INFO[this.emotion];
+      },
+      icon() {
+        if (this.emotion == null) return '';
+
+        return this.icons[this.emotion].icon
       },
       message() {
         if (this.emotion == 'freebie') {

@@ -13,19 +13,33 @@ Amplify.configure(config);
 
 Vue.config.productionTip = false
 
-const EMOTIONS_LIST = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
+const emotionsList = 'HAPPY|SAD|ANGRY|CONFUSED|DISGUSTED|SURPRISED|CALM|FEAR'.toLowerCase().split('|');
 
-const EMOTION_INFO =
+const emotionsInfo =
   new Map(
-    EMOTIONS_LIST.map((value) =>
+    emotionsList.map((value) =>
     [
       value,
       {
-        icon: `/images/emotions/${value}-tight.png`,
-        size: 50,
         name: value
       }
-    ]));
+    ])
+  );
+
+const emotionIcons = Object.fromEntries(
+  emotionsList.map((value) =>
+  [
+    value,
+    {
+      icon: `/images/emotions/${value}-tight.png`,
+      size: 50
+    }
+  ]));
+
+// Non-emotion for the center grid-cell.
+emotionIcons['freebie'] = {
+    icon: '/images/jack-o-lantern.png'
+  };
 
 new Vue({
   vuetify,
@@ -33,4 +47,4 @@ new Vue({
   render: h => h(App)
 }).$mount('#app')
 
-export { EMOTIONS_LIST, EMOTION_INFO };
+export { emotionsList, emotionsInfo, emotionIcons };

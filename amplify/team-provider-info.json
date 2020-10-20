@@ -12,14 +12,14 @@
       "AmplifyAppId": "d36kmdo1bqjtng"
     },
     "categories": {
-      "auth": {
-        "emobingo01334f5f": {}
-      },
       "hosting": {
         "amplifyhosting": {
           "appId": "d36kmdo1bqjtng",
           "type": "cicd"
         }
+      },
+      "auth": {
+        "emobingo32d5740232d57402": {}
       }
     }
   }

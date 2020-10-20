@@ -1,39 +1,130 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const getEntry = /* GraphQL */ `
-  query GetEntry($id: ID!) {
-    getEntry(id: $id) {
+export const getGame = /* GraphQL */ `
+  query GetGame($id: ID!) {
+    getGame(id: $id) {
       id
-      name
-      note
-      image
-      faces
-      emotions
-      emotion
-      confidence
+      state
+      images {
+        items {
+          id
+          title
+          fileName
+          emotions
+          data
+          createdAt
+          updatedAt
+          owner
+        }
+        nextToken
+      }
+      status
       createdAt
       updatedAt
       owner
     }
   }
 `;
-export const listEntrys = /* GraphQL */ `
-  query ListEntrys(
-    $filter: ModelEntryFilterInput
+export const listGames = /* GraphQL */ `
+  query ListGames(
+    $filter: ModelGameFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    listEntrys(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    listGames(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        name
-        note
-        image
-        faces
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+export const getImage = /* GraphQL */ `
+  query GetImage($id: ID!) {
+    getImage(id: $id) {
+      id
+      title
+      fileName
+      emotions
+      data
+      game {
+        id
+        state
+        images {
+          nextToken
+        }
+        status
+        createdAt
+        updatedAt
+        owner
+      }
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const listImages = /* GraphQL */ `
+  query ListImages(
+    $filter: ModelImageFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listImages(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        title
+        fileName
         emotions
-        emotion
-        confidence
+        data
+        game {
+          id
+          state
+          status
+          createdAt
+          updatedAt
+          owner
+        }
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+    }
+  }
+`;
+export const getStats = /* GraphQL */ `
+  query GetStats($id: ID!) {
+    getStats(id: $id) {
+      id
+      wins
+      losses
+      createdAt
+      updatedAt
+      owner
+    }
+  }
+`;
+export const listStatss = /* GraphQL */ `
+  query ListStatss(
+    $filter: ModelStatsFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listStatss(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        wins
+        losses
         createdAt
         updatedAt
         owner

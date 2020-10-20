@@ -1,8 +1,8 @@
 {
-    "identityPoolName": "emobingo01334f5f_identitypool_01334f5f",
+    "identityPoolName": "emobingo32d57402_identitypool_32d57402",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "emobin01334f5f",
-    "userPoolName": "emobingo01334f5f_userpool_01334f5f",
+    "resourceNameTruncated": "emobin32d57402",
+    "userPoolName": "emobingo32d57402_userpool_32d57402",
     "autoVerifiedAttributes": [
         "email"
     ],
@@ -11,8 +11,8 @@
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
     "smsVerificationMessage": "Your verification code is {####}",
-    "emailVerificationSubject": "Your emo-Bingo verification code",
-    "emailVerificationMessage": "Your emo-Bingo verification code is {####}",
+    "emailVerificationSubject": "Your emo-Bingo Verification code",
+    "emailVerificationMessage": "Your emo-Bingo Verification code is {####}",
     "defaultPasswordPolicy": false,
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [],
@@ -27,10 +27,10 @@
     "userpoolClientReadAttributes": [
         "email"
     ],
-    "userpoolClientLambdaRole": "emobin01334f5f_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "emobin32d57402_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "01334f5f",
-    "resourceName": "emobingo01334f5f",
+    "sharedId": "32d57402",
+    "resourceName": "emobingo32d5740232d57402",
     "authSelections": "identityPoolAndUserPool",
     "authRoleArn": {
         "Fn::GetAtt": [
@@ -44,8 +44,19 @@
             "Arn"
         ]
     },
-    "useDefault": "default",
-    "userPoolGroupList": [],
+    "useDefault": "manual",
+    "thirdPartyAuth": false,
+    "userPoolGroups": true,
+    "adminQueries": false,
+    "triggers": "{}",
+    "hostedUI": false,
+    "userPoolGroupList": [
+        "emobingouserpoolgroup"
+    ],
     "serviceName": "Cognito",
+    "parentStack": {
+        "Ref": "AWS::StackId"
+    },
+    "permissions": [],
     "dependsOn": []
 }

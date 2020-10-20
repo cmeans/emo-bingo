@@ -1,0 +1,21 @@
+type Game @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  state: AWSJSON
+  images: [Image] @connection(name: "GameImages")
+  status: String
+}
+
+type Image @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  title: String
+  fileName: String
+  emotions: AWSJSON
+  data: AWSJSON
+  game: Game @connection(name: "GameImages")
+}
+
+type Stats @model @auth(rules: [{ allow: owner, operations: [create, delete, update] }]) {
+  id: ID!
+  wins: Int
+  losses: Int
+}
