@@ -50,6 +50,20 @@
             "Arn",
             "LambdaExecutionRole"
           ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "emobingo32d5740232d57402",
+          "attributes": [
+            "UserPoolId"
+          ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "userPoolGroups",
+          "attributes": [
+            "emobingouserpoolgroupGroupRole"
+          ]
         }
       ]
     }

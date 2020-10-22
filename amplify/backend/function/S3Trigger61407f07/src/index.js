@@ -21,11 +21,10 @@ exports.handler = async (event, context) => {
     "Attributes": ["ALL"]
   }
 
-  /*
   const mdParams = {
     "Bucket": bucket,
     "Key": key
-    // "x-amz-request-payer": "requester"
+    // "request-payer": "requester"
   }
 
   console.log('About to retreive S3 image metadata:');
@@ -33,7 +32,6 @@ exports.handler = async (event, context) => {
   var data = await s3.headObject(mdParams).promise();
   var metadata = (!data) ? null : data.Metadata;
   console.log('Metadata:', metadata);
-  */
 
   console.log("About to call detectFaces:", params);
   try {
@@ -43,9 +41,13 @@ exports.handler = async (event, context) => {
     var keys = [{ Key: "Faces", Value: `${response.FaceDetails.length}` }];
 
     if (response.FaceDetails.length > 0) {
+      console.log("FaceDetails:", response.FaceDetails);
+
       const emotions = response.FaceDetails[0].Emotions;
 
       keys.push({ Key: "Emotions", Value: `${emotions.length}` });
+
+      console.log("Emotions:", emotions);
 
       if (emotions.length > 0) {
         keys.push({ Key: "Emotion", Value: emotions[0].Type });

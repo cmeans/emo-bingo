@@ -61,6 +61,7 @@
         this.$root.$on('turn-complete', (targetEmotion, image) => {
           this.saveTurnInfo(targetEmotion, image)
             .then(() => {
+              console.log('Saved turn info')
               // this.updateBoard(targetEmotion);
             })
         });
@@ -166,13 +167,13 @@
           const s3Entry =
             await Storage.put(
               imageFile.name,
-              imageFile);
-              // {
-              //   level: 'public'
-              //   // metadata: {
-              //   //   imageId: response.data.createImage.id
-              //   // }
-              // });
+              imageFile,
+              {
+                level: 'private',
+                metadata: {
+                  imageId: response.data.createImage.id
+                }
+              });
 
             console.log('S3 Entry:');
             console.log(s3Entry);
