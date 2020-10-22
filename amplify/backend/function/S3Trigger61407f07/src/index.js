@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-2'});
 const s3 = new AWS.S3();
 const rekognition = new AWS.Rekognition();
-var dynDb = new AWS.DynamoDB.DocumentClient();
+const dynDb = new AWS.DynamoDB.DocumentClient();
 
 // eslint-disable-next-line
 exports.handler = async (event, context) => {
@@ -56,9 +56,9 @@ exports.handler = async (event, context) => {
       //   keys.push({ Key: "Confidence", Value: `${emotions[0].Confidence}` });
       // }
       dbParams = {
-        TableName: "Game-mqo2zfezgjbg7drqhy5lohttae-dev",
+        TableName: "Image-mqo2zfezgjbg7drqhy5lohttae-dev",
         Key:{
-            "id": metadata['image-id']
+            "id": metadata['imageid']
         },
         UpdateExpression: "set detectedEmotion=:e, confidence=:c, data=:d",
         ExpressionAttributeValues:{
@@ -70,7 +70,7 @@ exports.handler = async (event, context) => {
       };
     } else {
       dbParams = {
-        TableName: "Game-mqo2zfezgjbg7drqhy5lohttae-dev",
+        TableName: "Image-mqo2zfezgjbg7drqhy5lohttae-dev",
         Key:{
             "id": metadata['imageid']
         },
@@ -82,7 +82,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const dbResponse = dynDb.update(dbParams).promise();
+    const dbResponse = await dynDb.update(dbParams).promise();
 
     console.info("dbUpdate:", dbResponse);
 

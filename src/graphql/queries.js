@@ -11,7 +11,8 @@ export const getGame = /* GraphQL */ `
           id
           targetEmotion
           fileName
-          emotions
+          detectedEmotion
+          confidence
           data
           createdAt
           updatedAt
@@ -54,7 +55,8 @@ export const getImage = /* GraphQL */ `
       id
       targetEmotion
       fileName
-      emotions
+      detectedEmotion
+      confidence
       data
       game {
         id
@@ -84,7 +86,8 @@ export const listImages = /* GraphQL */ `
         id
         targetEmotion
         fileName
-        emotions
+        detectedEmotion
+        confidence
         data
         game {
           id

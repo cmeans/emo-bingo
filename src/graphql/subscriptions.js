@@ -11,7 +11,8 @@ export const onCreateGame = /* GraphQL */ `
           id
           targetEmotion
           fileName
-          emotions
+          detectedEmotion
+          confidence
           data
           createdAt
           updatedAt
@@ -36,7 +37,8 @@ export const onUpdateGame = /* GraphQL */ `
           id
           targetEmotion
           fileName
-          emotions
+          detectedEmotion
+          confidence
           data
           createdAt
           updatedAt
@@ -61,7 +63,8 @@ export const onDeleteGame = /* GraphQL */ `
           id
           targetEmotion
           fileName
-          emotions
+          detectedEmotion
+          confidence
           data
           createdAt
           updatedAt
@@ -82,7 +85,8 @@ export const onCreateImage = /* GraphQL */ `
       id
       targetEmotion
       fileName
-      emotions
+      detectedEmotion
+      confidence
       data
       game {
         id
@@ -107,7 +111,8 @@ export const onUpdateImage = /* GraphQL */ `
       id
       targetEmotion
       fileName
-      emotions
+      detectedEmotion
+      confidence
       data
       game {
         id
@@ -132,7 +137,8 @@ export const onDeleteImage = /* GraphQL */ `
       id
       targetEmotion
       fileName
-      emotions
+      detectedEmotion
+      confidence
       data
       game {
         id
