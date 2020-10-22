@@ -56,7 +56,7 @@
 		"s3PermissionsGuestPublic": {
 			"Type": "String",
 			"Default" : "DISALLOW"
-		},	
+		},
 		"s3PermissionsGuestUploads": {
 			"Type": "String",
 			"Default" : "DISALLOW"		},
@@ -82,26 +82,26 @@
 		"triggerFunction": {
 			"Type": "String"
 		},
-	
-    
-    
+
+
+
         "functionS3Trigger61407f07Name": {
             "Type": "String",
             "Default": "functionS3Trigger61407f07Name"
         },
-        
+
         "functionS3Trigger61407f07Arn": {
             "Type": "String",
             "Default": "functionS3Trigger61407f07Arn"
         },
-        
+
         "functionS3Trigger61407f07LambdaExecutionRole": {
             "Type": "String",
             "Default": "functionS3Trigger61407f07LambdaExecutionRole"
         }
-        
-        
-    
+
+
+
 
 	},
 	"Conditions": {
@@ -181,11 +181,11 @@
 	"Resources": {
 		"S3Bucket": {
 			"Type": "AWS::S3::Bucket",
-		     
+
             "DependsOn": [
 				"TriggerPermissions"
 			],
-            
+
 			"DeletionPolicy" : "Retain",
 			"Properties": {
 				"BucketName": {
@@ -223,7 +223,7 @@
                         }
                     ]
                 },
-                 
+
                 "NotificationConfiguration": {
                     "LambdaConfigurations": [
                         {
@@ -240,7 +240,7 @@
                         }
                     ]
                 },
-                
+
 				"CorsConfiguration": {
 					"CorsRules": [
 						{
@@ -270,8 +270,8 @@
 				}
 			}
 		},
-      
-	     
+
+
 	    "TriggerPermissions": {
           "Type": "AWS::Lambda::Permission",
           "Properties": {
@@ -343,7 +343,14 @@
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
-                        {
+						{
+							"Effect": "Allow",
+							"Action": [
+								"rekognition:*"
+							],
+							"Resource": "*"
+						},
+						{
                             "Effect": "Allow",
                             "Action": [
                                 "s3:PutObject",
@@ -370,7 +377,7 @@
                 }
             }
         },
-	    
+
 		"S3AuthPublicPolicy": {
 			"DependsOn": [
 				"S3Bucket"
@@ -394,7 +401,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedPublic"
-								} ] 
+								} ]
 							},
 							"Resource": [
 								{
@@ -438,7 +445,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedProtected"
-								} ] 
+								} ]
 							},
 							"Resource": [
 								{
@@ -482,7 +489,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedPrivate"
-								} ] 
+								} ]
 							},
 							"Resource": [
 								{
@@ -526,7 +533,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsAuthenticatedUploads"
-								} ] 
+								} ]
 							},
 							"Resource": [
 								{
@@ -643,7 +650,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsGuestPublic"
-								} ] 
+								} ]
 							},
 							"Resource": [
 								{
@@ -687,7 +694,7 @@
 							"Action": {
 								"Fn::Split" : [ "," , {
 									"Ref": "s3PermissionsGuestUploads"
-								} ] 
+								} ]
 							},
 							"Resource": [
 								{

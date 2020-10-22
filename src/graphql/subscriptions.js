@@ -9,7 +9,7 @@ export const onCreateGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -34,7 +34,7 @@ export const onUpdateGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -59,7 +59,7 @@ export const onDeleteGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -80,7 +80,7 @@ export const onCreateImage = /* GraphQL */ `
   subscription OnCreateImage($owner: String!) {
     onCreateImage(owner: $owner) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data
@@ -105,7 +105,7 @@ export const onUpdateImage = /* GraphQL */ `
   subscription OnUpdateImage($owner: String!) {
     onUpdateImage(owner: $owner) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data
@@ -130,7 +130,7 @@ export const onDeleteImage = /* GraphQL */ `
   subscription OnDeleteImage($owner: String!) {
     onDeleteImage(owner: $owner) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data

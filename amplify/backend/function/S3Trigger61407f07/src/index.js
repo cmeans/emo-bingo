@@ -21,6 +21,20 @@ exports.handler = async (event, context) => {
     "Attributes": ["ALL"]
   }
 
+  /*
+  const mdParams = {
+    "Bucket": bucket,
+    "Key": key
+    // "x-amz-request-payer": "requester"
+  }
+
+  console.log('About to retreive S3 image metadata:');
+
+  var data = await s3.headObject(mdParams).promise();
+  var metadata = (!data) ? null : data.Metadata;
+  console.log('Metadata:', metadata);
+  */
+
   console.log("About to call detectFaces:", params);
   try {
     console.log("Rekognition client:", rekognition)
@@ -39,17 +53,17 @@ exports.handler = async (event, context) => {
       }
     }
 
-    console.info("Tagged object with:", keys);
+    console.info("Properties object with:", keys);
 
-    const imageParams = {
-        Bucket: bucket,
-        Key: key,
-        Tagging: {
-          TagSet: keys
-        }
-      };
+    // const imageParams = {
+    //     Bucket: bucket,
+    //     Key: key,
+    //     Tagging: {
+    //       TagSet: keys
+    //     }
+    //   };
 
-    await s3.putObjectTagging(imageParams).promise();
+    // await s3.putObjectTagging(imageParams).promise();
 
     context.done(null, 'Successfully processed S3 event, and tagged source'); // SUCCESS with message
   }

@@ -9,7 +9,7 @@ export const getGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -52,7 +52,7 @@ export const getImage = /* GraphQL */ `
   query GetImage($id: ID!) {
     getImage(id: $id) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data
@@ -82,7 +82,7 @@ export const listImages = /* GraphQL */ `
     listImages(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        title
+        targetEmotion
         fileName
         emotions
         data

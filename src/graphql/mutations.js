@@ -12,7 +12,7 @@ export const createGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -40,7 +40,7 @@ export const updateGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -68,7 +68,7 @@ export const deleteGame = /* GraphQL */ `
       images {
         items {
           id
-          title
+          targetEmotion
           fileName
           emotions
           data
@@ -92,7 +92,7 @@ export const createImage = /* GraphQL */ `
   ) {
     createImage(input: $input, condition: $condition) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data
@@ -120,7 +120,7 @@ export const updateImage = /* GraphQL */ `
   ) {
     updateImage(input: $input, condition: $condition) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data
@@ -148,7 +148,7 @@ export const deleteImage = /* GraphQL */ `
   ) {
     deleteImage(input: $input, condition: $condition) {
       id
-      title
+      targetEmotion
       fileName
       emotions
       data

@@ -139,7 +139,9 @@
       submitSelfie() {
         this.$root.$emit(
           'turn-complete',
-          this.emotion);
+          this.emotion,
+          this.imageFile
+          );
         this.resetData();
       }
     }
