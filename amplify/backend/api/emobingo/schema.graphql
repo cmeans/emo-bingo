@@ -5,7 +5,7 @@ type Game @model @auth(rules: [{ allow: owner }]) {
   status: String
 }
 
-type Image @model @auth(rules: [{ allow: owner }]) {
+type Image @model @searchable @auth(rules: [{ allow: owner }]) {
   id: ID!
   targetEmotion: String
   fileName: String

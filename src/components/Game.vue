@@ -22,9 +22,11 @@
   import TakeTurn from './TakeTurn';
   import BingoSquare from './BingoSquare';
   import { emotionsList, emotionsInfo, emotionIcons } from '../main';
-  import { API, Storage } from 'aws-amplify';
+  import { API, Storage /*, graphqlOperation */} from 'aws-amplify';
+  import Auth from '@aws-amplify/auth';
   import { createGame, createImage } from '../graphql/mutations';
-  import { listGames } from '../graphql/queries';
+  import { listGames, listImages } from '../graphql/queries';
+  import { onUpdateImage } from '../graphql/subscriptions';
 
   export default {
     name: 'Game',
@@ -34,25 +36,60 @@
       BingoSquare
     },
     created() {
-      console.log("Game Componentt Created");
+      console.log("Game Component Created");
+      this.init();
+
       this.initGameEventListeners();
       this.initGameState();
       this.initAvailableEmotions();
+
+      // this.startImageUpdateSubscription();
+
       const _this = this;
       this.findActiveGameId()
         .then(() => {
           console.log(`ActiveGameId = ${_this.activeGameId}`)
         });
     },
+    destroyed() {
+      this.stopImageUpdateSubscription();
+    },
     data() {
       return {
+        username: null,
         activeGameId: 'dummy',
         turnActive: false,
         availableEmotions: [],
-        state: []
+        state: [],
+        imageUpdateSubscription: null
+      }
+    },
+    watch: {
+      username(newUserName, oldUserName) {
+        try {
+          if (oldUserName) {
+            console.log('unsubscribing...', oldUserName)
+            this.stopImageUpdateSubscription();
+          }
+          if (newUserName) {
+            console.log('subscribing...', newUserName)
+            this.startImageUpdateSubscription().then(() => {
+              console.log('good now')
+            })
+          }
+        } catch (ex) {
+          console.log(ex)
+        }
       }
     },
     methods: {
+      async init() {
+        console.log('init')
+        const owner = await Auth.currentAuthenticatedUser();
+        console.log(owner);
+        this.username = owner.username;
+        console.log(this.username);
+      },
       initGameEventListeners() {
         this.$root.$on('take-a-turn', () => {
           this.turnActive = !this.turnActive;
@@ -75,6 +112,53 @@
               ...value
             });
         });
+      },
+      stopImageUpdateSubscription() {
+        console.log(`Unsubscribing from Image updates for: ${this.username}`);
+
+        if (this.imageUpdateSubscription) {
+          this.imageUpdateSubscription.unsubscribe();
+          this.imageUpdateSubscription = null;
+        }
+      },
+      async startImageUpdateSubscription() {
+        console.log(`Subscribing to Image updates for: ${this.username}`);
+
+        if (this.imageUpdateSubscription) {
+          alert('Image Update Subscription already active');
+          return;
+        }
+
+        this.imageUpdateSubscription =
+          await API.graphql({
+            query: onUpdateImage,
+            variables: { owner: this.username }
+          })
+          .subscribe({
+            next: (eventData) => {
+              console.log(eventData);
+              alert(eventData);
+              // let todo = eventData.value.data.onCreateTodo;
+              // if (this.todos.some(item => item.name === todo.name)) return; // remove duplications
+              // this.todos = [...this.todos, todo];
+            }
+          });
+          /*
+          await API.graphql(
+            graphqlOperation(
+              onUpdateImage,
+              {
+                owner: this.username
+              }
+            )
+          ).subscribe({
+            next: (image) => {
+              console.log('Subscription Image Update:');
+              console.log(image);
+            }
+          });
+          */
+        console.log('Subscription active.', this.imageUpdateSubscription);
       },
       getRandomEmotionName() {
         return emotionsList[Math.floor(Math.random() * emotionsList.length)];
@@ -134,6 +218,21 @@
 
         return response.data.createGame;
       },
+      async getUpdatedImageEntry(id) {
+        let filter = {
+          id: {
+            eq: id
+          }};
+
+        const queryResponse =
+          await API.graphql({
+            query: listImages,
+            variables: {
+              filter
+            }});
+
+        console.log(queryResponse);
+      },
       async saveTurnInfo(targetEmotion, imageFile) {
 
         console.log(`targetEmotion: ${targetEmotion}`);
@@ -159,7 +258,11 @@
           }
 
           const response =
-            await API.graphql({ query: createImage, variables: { input: data } });
+            await API.graphql({
+              query: createImage,
+              variables: {
+                input: data
+              }});
 
           console.log('imageEntry:');
           console.log(response);
@@ -178,7 +281,33 @@
             console.log('S3 Entry:');
             console.log(s3Entry);
 
+            setTimeout(() => {
+              console.log('listImages');
+              this.getUpdatedImageEntry(response.data.createImage.id);
+            },
+            5000)
+            /*
+            const owner = await Auth.currentAuthenticatedUser();
+
+            console.log(owner.username)
+
             // onUpdate subscription for imageEntry.id
+            const subscription =
+              await API.graphql(
+                graphqlOperation(
+                  onUpdateImage,
+                  {
+                    owner: owner.username
+                  }
+                )
+              ).subscribe({
+                next: (image) => {
+                  console.log('Subscription Image Update:');
+                  alert(image);
+                  subscription.unsubscribe();
+                }
+              })
+            */
         }
         finally {
           // this.overlay = false;

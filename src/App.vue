@@ -109,6 +109,14 @@ export default {
     onAuthUIStateChange((authState, authData) => {
       this.authState = authState;
       this.user = authData;
+
+      /*
+      if (this.authState == 'signedin') {
+        this.$root.$emit('signed-in', this.user.name);
+      } else {
+        this.$root.$emit('signed-out');
+      }
+      */
     });
   },
   data() {

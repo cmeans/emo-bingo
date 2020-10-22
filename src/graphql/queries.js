@@ -136,3 +136,40 @@ export const listStatss = /* GraphQL */ `
     }
   }
 `;
+export const searchImages = /* GraphQL */ `
+  query SearchImages(
+    $filter: SearchableImageFilterInput
+    $sort: SearchableImageSortInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    searchImages(
+      filter: $filter
+      sort: $sort
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        targetEmotion
+        fileName
+        detectedEmotion
+        confidence
+        faceDetails
+        game {
+          id
+          state
+          status
+          createdAt
+          updatedAt
+          owner
+        }
+        createdAt
+        updatedAt
+        owner
+      }
+      nextToken
+      total
+    }
+  }
+`;
