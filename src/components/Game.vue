@@ -61,7 +61,7 @@
         this.$root.$on('turn-complete', (targetEmotion, image) => {
           this.saveTurnInfo(targetEmotion, image)
             .then(() => {
-              console.log('Saved turn info')
+              console.log('Saved turn info');
               // this.updateBoard(targetEmotion);
             })
         });
