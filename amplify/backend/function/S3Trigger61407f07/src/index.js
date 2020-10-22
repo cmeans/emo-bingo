@@ -72,7 +72,7 @@ exports.handler = async (event, context) => {
       dbParams = {
         TableName: "Game-mqo2zfezgjbg7drqhy5lohttae-dev",
         Key:{
-            "id": metadata['image-id']
+            "id": metadata['imageid']
         },
         UpdateExpression: "set detectedEmotion = :e",
         ExpressionAttributeValues:{

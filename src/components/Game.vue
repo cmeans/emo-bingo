@@ -171,7 +171,7 @@
               {
                 level: 'public',
                 metadata: {
-                  'image-id': response.data.createImage.id
+                  'imageid': response.data.createImage.id
                 }
               });
 
