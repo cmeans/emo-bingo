@@ -9,7 +9,8 @@ type Image @model @auth(rules: [{ allow: owner }]) {
   id: ID!
   targetEmotion: String
   fileName: String
-  emotions: AWSJSON
+  detectedEmotion: String
+  confidence: String
   data: AWSJSON
   game: Game @connection(name: "GameImages")
 }

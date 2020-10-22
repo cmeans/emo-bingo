@@ -169,9 +169,9 @@
               imageFile.name,
               imageFile,
               {
-                level: 'protected',
+                level: 'public',
                 metadata: {
-                  imageId: response.data.createImage.id
+                  'image-id': response.data.createImage.id
                 }
               });
 

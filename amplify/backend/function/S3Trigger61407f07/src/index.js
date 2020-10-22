@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-2'});
 const s3 = new AWS.S3();
 const rekognition = new AWS.Rekognition();
+var dynDb = new AWS.DynamoDB.DocumentClient();
 
 // eslint-disable-next-line
 exports.handler = async (event, context) => {
@@ -9,7 +10,7 @@ exports.handler = async (event, context) => {
   // Get the object from the event and show its content type
   const bucket = event.Records[0].s3.bucket.name; //eslint-disable-line
   const key = event.Records[0].s3.object.key; //eslint-disable-line
-  console.log(`Bucket: ${bucket}`, `Key: ${key}`);
+  // console.log(`Bucket: ${bucket}`, `Key: ${key}`);
 
   const params = {
     "Image": {
@@ -24,48 +25,66 @@ exports.handler = async (event, context) => {
   const mdParams = {
     "Bucket": bucket,
     "Key": key
-    // "request-payer": "requester"
   }
 
-  console.log('About to retreive S3 image metadata:');
+  // console.log('About to retreive S3 image metadata:');
 
   var data = await s3.headObject(mdParams).promise();
   var metadata = (!data) ? null : data.Metadata;
-  console.log('Metadata:', metadata);
+  // console.log('Metadata:', metadata);
 
-  console.log("About to call detectFaces:", params);
+  // console.log("About to call detectFaces:", params);
   try {
-    console.log("Rekognition client:", rekognition)
+    // console.log("Rekognition client:", rekognition)
     var response = await rekognition.detectFaces(params).promise();
 
-    var keys = [{ Key: "Faces", Value: `${response.FaceDetails.length}` }];
+    // var keys = [{ Key: "Faces", Value: `${response.FaceDetails.length}` }];
+
+    var dbParams;
 
     if (response.FaceDetails.length > 0) {
-      console.log("FaceDetails:", response.FaceDetails);
+      // console.log("FaceDetails:", response.FaceDetails);
 
       const emotions = response.FaceDetails[0].Emotions;
 
-      keys.push({ Key: "Emotions", Value: `${emotions.length}` });
+      // keys.push({ Key: "Emotions", Value: `${emotions.length}` });
 
-      console.log("Emotions:", emotions);
+      // console.log("Emotions:", emotions);
 
-      if (emotions.length > 0) {
-        keys.push({ Key: "Emotion", Value: emotions[0].Type });
-        keys.push({ Key: "Confidence", Value: `${emotions[0].Confidence}` });
-      }
+      // if (emotions.length > 0) {
+      //   keys.push({ Key: "Emotion", Value: emotions[0].Type });
+      //   keys.push({ Key: "Confidence", Value: `${emotions[0].Confidence}` });
+      // }
+      dbParams = {
+        TableName: "Game-mqo2zfezgjbg7drqhy5lohttae-dev",
+        Key:{
+            "id": metadata['image-id']
+        },
+        UpdateExpression: "set detectedEmotion=:e, confidence=:c, data=:d",
+        ExpressionAttributeValues:{
+            ":e": emotions[0].Type,
+            ":c": emotions[0].Confidence,
+            ":d": response.FaceDetails
+        },
+        ReturnValues:"UPDATED_NEW"
+      };
+    } else {
+      dbParams = {
+        TableName: "Game-mqo2zfezgjbg7drqhy5lohttae-dev",
+        Key:{
+            "id": metadata['image-id']
+        },
+        UpdateExpression: "set detectedEmotion = :e",
+        ExpressionAttributeValues:{
+            ":e": 'fail'
+        },
+        ReturnValues:"UPDATED_NEW"
+      };
     }
 
-    console.info("Properties object with:", keys);
+    const dbResponse = dynDb.update(dbParams).promise();
 
-    // const imageParams = {
-    //     Bucket: bucket,
-    //     Key: key,
-    //     Tagging: {
-    //       TagSet: keys
-    //     }
-    //   };
-
-    // await s3.putObjectTagging(imageParams).promise();
+    console.info("dbUpdate:", dbResponse);
 
     context.done(null, 'Successfully processed S3 event, and tagged source'); // SUCCESS with message
   }
