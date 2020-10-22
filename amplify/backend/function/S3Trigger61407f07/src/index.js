@@ -60,7 +60,7 @@ exports.handler = async (event, context) => {
         Key:{
             "id": metadata['imageid']
         },
-        UpdateExpression: "set detectedEmotion=:e, confidence=:c, data=:d",
+        UpdateExpression: "set detectedEmotion=:e, confidence=:c, faceDetails=:d",
         ExpressionAttributeValues:{
             ":e": emotions[0].Type,
             ":c": emotions[0].Confidence,
