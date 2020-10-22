@@ -25,10 +25,9 @@
           </div>
           <v-overlay :absolute="true" v-show="entry.play != -1">
             <v-img
-              _v-show="entry.name != entry.emotion"
               contain
               :src="entryOverlay(entry.play)"
-              width="100"
+              width="80"
             >
             </v-img>
           </v-overlay>
@@ -84,7 +83,7 @@
         if (play == 0) {
           return '/images/cross-mark.png' // Miss.
         }
-        return '/images/cross-mark.png' // Hit.
+        return '/images/check-mark.png' // Hit.
       },
       showCellInfoDialog(emotion) {
         this.showEmotion = emotion;
