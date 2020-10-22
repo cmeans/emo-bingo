@@ -9,6 +9,7 @@ export const onCreateGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -16,7 +17,6 @@ export const onCreateGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -35,6 +35,7 @@ export const onUpdateGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -42,7 +43,6 @@ export const onUpdateGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -61,6 +61,7 @@ export const onDeleteGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -68,7 +69,6 @@ export const onDeleteGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -83,6 +83,7 @@ export const onCreateImage = /* GraphQL */ `
   subscription OnCreateImage($owner: String!) {
     onCreateImage(owner: $owner) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -101,7 +102,6 @@ export const onCreateImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;
@@ -109,6 +109,7 @@ export const onUpdateImage = /* GraphQL */ `
   subscription OnUpdateImage($owner: String!) {
     onUpdateImage(owner: $owner) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -127,7 +128,6 @@ export const onUpdateImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;
@@ -135,6 +135,7 @@ export const onDeleteImage = /* GraphQL */ `
   subscription OnDeleteImage($owner: String!) {
     onDeleteImage(owner: $owner) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -153,7 +154,6 @@ export const onDeleteImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;

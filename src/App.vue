@@ -22,6 +22,7 @@
         <v-toolbar-title>emo-Bingo</v-toolbar-title>
       </div>
 
+      <!--
       <v-btn
         class="ml-2"
         v-if="authState === 'signedin' && user && $router.currentRoute.path == '/'"
@@ -29,6 +30,7 @@
       >
         Play
       </v-btn>
+      //-->
 
       <v-spacer></v-spacer>
 

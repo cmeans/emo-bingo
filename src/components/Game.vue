@@ -12,9 +12,14 @@
         >
           Take your Turn
         </v-btn>
-        <BingoSquare :gameState="state" />
+        <BingoSquare :gameState="gameState" />
       </div>
     </v-slide-x-transition>
+    <v-overlay :absolute="true" v-show="processingEntry == true">
+      <v-progress-circular
+        indeterminate
+        color="primary" />
+    </v-overlay>
   </div>
 </template>
 
@@ -27,6 +32,12 @@
   import { createGame, createImage } from '../graphql/mutations';
   import { listGames, listImages } from '../graphql/queries';
   import { onUpdateImage } from '../graphql/subscriptions';
+
+  const PLAY = {
+    AVAILABLE: -1,
+    MISS: 0,
+    HIT: 1
+  };
 
   export default {
     name: 'Game',
@@ -58,10 +69,13 @@
       return {
         username: null,
         activeGameId: 'dummy',
+        targetEmotion: null,
         turnActive: false,
         availableEmotions: [],
         state: [],
-        imageUpdateSubscription: null
+        imageUpdateSubscription: null,
+        minimumConfidenceLevel: 80.0,
+        processingEntry: false
       }
     },
     watch: {
@@ -80,6 +94,11 @@
         } catch (ex) {
           console.log(ex)
         }
+      }
+    },
+    computed: {
+      gameState() {
+        return this.state;
       }
     },
     methods: {
@@ -130,7 +149,7 @@
         }
 
         this.imageUpdateSubscription =
-          await API.graphql({
+          API.graphql({
             query: onUpdateImage,
             variables: { owner: this.username }
           })
@@ -163,11 +182,15 @@
       getRandomEmotionName() {
         return emotionsList[Math.floor(Math.random() * emotionsList.length)];
       },
-      // initEmotionNames() {
-      //   this.emotionNames = Array.from(emotionInfo.keys());
-      // },
+      updateAvailableEmotions(emotion) {
+        this.availableEmotions.forEach((value) => {
+          if (value.name == emotion) {
+            value.selected = true;
+          }
+        });
+      },
       initGameState() {
-        this.state = new Array(24);
+        let state = new Array(24);
 
         let positions = [...Array(24).keys()];
 
@@ -175,8 +198,8 @@
           for (let e = 0; e < emotionsList.length; e++) {
             const position = Math.floor(Math.random() * positions.length);
             const item = emotionsInfo.get(emotionsList[e]);
-            this.state[positions[position]] = {
-              i: positions[position],
+            state[positions[position]] = {
+              play: PLAY.AVAILABLE,
               ...item
             };
 
@@ -184,11 +207,16 @@
           }
         }
 
-        this.state.splice(12, 0, {
-            i: 12,
-            name: 'freebie',
-            emotion: 'freebie'
+        state.splice(12, 0, {
+          play: PLAY.AVAILABLE,
+          name: 'freebie',
+          emotion: 'freebie'
         });
+
+        // Set unique key/ids.
+        // state.forEach((item, index) => { item['id'] = `${item.name}-${index}-${item.play}` });
+
+        this.state = state;
       },
       async findActiveGameId() {
         let filter = {
@@ -231,9 +259,55 @@
               filter
             }});
 
-        console.log(queryResponse);
+        return queryResponse.data.listImages.items;
+      },
+      processTurnResults(imageEntries) {
+        console.log('processTurnResults:', imageEntries);
+
+        if (imageEntries.length > 0) {
+          const entry = imageEntries[0];
+
+          let play = PLAY.AVAILABLE;
+
+          switch (entry.detectedEmotion) {
+            case 'fail':
+              // Error processing image (or something else),
+              // let them retry.
+              alert('fail')
+              break;
+
+            case entry.targetEmotion:
+              console.log('emotions match:')
+              if (parseFloat(entry.confidence) >= this.minimumConfidenceLevel) {
+                console.log('Confidence: ' + parseFloat(entry.confidence))
+                // It's a hit!
+                play = PLAY.HIT;
+              } else {
+                console.log("Confidence too low")
+                play = PLAY.MISS;
+              }
+              break;
+
+            default:
+              // It's a miss!
+              play = PLAY.MISS;
+              console.log('emotions mismatch or low confidence...lost this round');
+          }
+
+          if (entry.detectedEmotion != 'fail') {
+            this.state.filter(cell => cell.name == entry.targetEmotion).forEach( cell => {
+              cell.play = play;
+            });
+            // Flag the emotion as no-longer-available.
+            this.updateAvailableEmotions(
+              entry.targetEmotion);
+          }
+        }
+
+        this.processingEntry = false;
       },
       async saveTurnInfo(targetEmotion, imageFile) {
+        this.processingEntry = true;
 
         console.log(`targetEmotion: ${targetEmotion}`);
         console.log(`image: ${imageFile}`);
@@ -241,12 +315,6 @@
 
         // this.emotion = targetEmotion;
         this.turnActive = false;
-        this.availableEmotions.forEach((value) => {
-          if (value.name == targetEmotion) {
-            value.selected = true;
-            console.log('availableEmotions Matched: ', value);
-          }
-        });
         // console.log(this.availableEmotions);
 
         // this.overlay = true;
@@ -283,7 +351,10 @@
 
             setTimeout(() => {
               console.log('listImages');
-              this.getUpdatedImageEntry(response.data.createImage.id);
+              this.getUpdatedImageEntry(response.data.createImage.id)
+                .then(results => {
+                  this.processTurnResults(results);
+                })
             },
             5000)
             /*

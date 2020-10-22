@@ -10,7 +10,7 @@
     </div>
   </div>
   <div class="square-container">
-    <div class="square" v-for="(entry, index) in gameState" :key="index">
+    <div class="square" v-for="entry in gameState" :key="entry.id">
       <v-card class="cell" @click="showCellInfoDialog(entry.name)">
         <v-card-text class="pa-0 pt-2 pb-2">
           <div align="center">
@@ -23,11 +23,11 @@
               v-bind:style="{ width: size }"
             />
           </div>
-          <v-overlay :absolute="true" v-show="entry.match">
+          <v-overlay :absolute="true" v-show="entry.play != -1">
             <v-img
-              v-show="entry.name != entry.emotion"
+              _v-show="entry.name != entry.emotion"
               contain
-              src="/images/cross-mark.png"
+              :src="entryOverlay(entry.play)"
               width="100"
             >
             </v-img>
@@ -80,6 +80,12 @@
       // entry(row, col) {
       //   return this.gameState[row * 5 + col];
       // },
+      entryOverlay(play) {
+        if (play == 0) {
+          return '/images/cross-mark.png' // Miss.
+        }
+        return '/images/cross-mark.png' // Hit.
+      },
       showCellInfoDialog(emotion) {
         this.showEmotion = emotion;
         this.showCellInfo = true;

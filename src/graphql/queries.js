@@ -9,6 +9,7 @@ export const getGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -16,7 +17,6 @@ export const getGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -53,6 +53,7 @@ export const getImage = /* GraphQL */ `
   query GetImage($id: ID!) {
     getImage(id: $id) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -71,7 +72,6 @@ export const getImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;
@@ -84,6 +84,7 @@ export const listImages = /* GraphQL */ `
     listImages(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        owner
         targetEmotion
         fileName
         detectedEmotion
@@ -99,7 +100,6 @@ export const listImages = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
       }
       nextToken
     }
@@ -151,6 +151,7 @@ export const searchImages = /* GraphQL */ `
     ) {
       items {
         id
+        owner
         targetEmotion
         fileName
         detectedEmotion
@@ -166,7 +167,6 @@ export const searchImages = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
       }
       nextToken
       total

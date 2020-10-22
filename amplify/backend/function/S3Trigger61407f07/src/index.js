@@ -7,91 +7,73 @@ const dynDb = new AWS.DynamoDB.DocumentClient();
 // eslint-disable-next-line
 exports.handler = async (event, context) => {
   console.log('Received S3 event:', JSON.stringify(event, null, 2));
-  // Get the object from the event and show its content type
-  const bucket = event.Records[0].s3.bucket.name; //eslint-disable-line
-  const key = event.Records[0].s3.object.key; //eslint-disable-line
-  // console.log(`Bucket: ${bucket}`, `Key: ${key}`);
+  for (let i = 0; i < event.Records.length; i++) {
+    const record = event.Records[i];
 
-  const params = {
-    "Image": {
-        "S3Object": {
-            "Bucket": bucket,
-            "Name": key
-        }
-    },
-    "Attributes": ["ALL"]
-  }
+    // Get the S3 object from the event record.
+    const bucket = record.s3.bucket.name; //eslint-disable-line
+    const key = record.s3.object.key; //eslint-disable-line
 
-  const mdParams = {
-    "Bucket": bucket,
-    "Key": key
-  }
-
-  // console.log('About to retreive S3 image metadata:');
-
-  var data = await s3.headObject(mdParams).promise();
-  var metadata = (!data) ? null : data.Metadata;
-  // console.log('Metadata:', metadata);
-
-  // console.log("About to call detectFaces:", params);
-  try {
-    // console.log("Rekognition client:", rekognition)
-    var response = await rekognition.detectFaces(params).promise();
-
-    // var keys = [{ Key: "Faces", Value: `${response.FaceDetails.length}` }];
-
-    var dbParams;
-
-    if (response.FaceDetails.length > 0) {
-      // console.log("FaceDetails:", response.FaceDetails);
-
-      const emotions = response.FaceDetails[0].Emotions;
-
-      // keys.push({ Key: "Emotions", Value: `${emotions.length}` });
-
-      // console.log("Emotions:", emotions);
-
-      // if (emotions.length > 0) {
-      //   keys.push({ Key: "Emotion", Value: emotions[0].Type });
-      //   keys.push({ Key: "Confidence", Value: `${emotions[0].Confidence}` });
-      // }
-      dbParams = {
-        TableName: "Image-mqo2zfezgjbg7drqhy5lohttae-dev",
-        Key:{
-            "id": metadata['imageid']
-        },
-        UpdateExpression: "set detectedEmotion=:e, confidence=:c, faceDetails=:d",
-        ExpressionAttributeValues:{
-            ":e": emotions[0].Type,
-            ":c": emotions[0].Confidence,
-            ":d": response.FaceDetails
-        },
-        ReturnValues:"UPDATED_NEW"
-      };
-    } else {
-      dbParams = {
-        TableName: "Image-mqo2zfezgjbg7drqhy5lohttae-dev",
-        Key:{
-            "id": metadata['imageid']
-        },
-        UpdateExpression: "set detectedEmotion = :e",
-        ExpressionAttributeValues:{
-            ":e": 'fail'
-        },
-        ReturnValues:"UPDATED_NEW"
-      };
+    // Retreive the Image Id from the S3 object metadata.
+    const s3MetadataParams = {
+      "Bucket": bucket,
+      "Key": key
     }
 
-    const dbResponse = await dynDb.update(dbParams).promise();
+    var data = await s3.headObject(s3MetadataParams).promise();
+    var metadata = (!data) ? null : data.Metadata;
 
-    console.info("dbUpdate:", dbResponse);
+    if (metadata) {
+      const rekognitionParams = {
+        "Image": {
+            "S3Object": {
+                "Bucket": bucket,
+                "Name": key
+            }
+        },
+        "Attributes": ["ALL"]
+      }
 
-    context.done(null, 'Successfully processed S3 event, and tagged source'); // SUCCESS with message
-  }
-  catch (error) {
-    console.error(error);
-  }
-  finally {
-    context.done(null, 'Finished processing S3 event');
+      var response = await rekognition.detectFaces(rekognitionParams).promise();
+
+      var dbKeyFields = {
+        TableName: "Image-mqo2zfezgjbg7drqhy5lohttae-dev",
+        Key: {
+          "id": metadata['imageid']
+        }
+      };
+
+      var dbParams;
+
+      if (response.FaceDetails && response.FaceDetails.length > 0) {
+        const emotions = response.FaceDetails[0].Emotions;
+
+        dbParams = {
+          ...dbKeyFields,
+          UpdateExpression: "set detectedEmotion=:e, confidence=:c, faceDetails=:d",
+          ExpressionAttributeValues:{
+              ":e": emotions[0].Type.toLowerCase(),
+              ":c": emotions[0].Confidence,
+              ":d": response.FaceDetails
+          },
+          ReturnValues:"UPDATED_NEW"
+        };
+      } else {
+        dbParams = {
+          ...dbKeyFields,
+          UpdateExpression: "set detectedEmotion = :e",
+          ExpressionAttributeValues:{
+              ":e": 'fail'
+          },
+          ReturnValues:"UPDATED_NEW"
+        };
+      }
+
+      const dbResponse = await dynDb.update(dbParams).promise();
+
+      console.info("dbUpdate:", dbResponse);
+
+      context.done(null, 'Successfully processed S3 event, and tagged source'); // SUCCESS with message
+    }
   }
 };

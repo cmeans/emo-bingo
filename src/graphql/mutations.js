@@ -12,6 +12,7 @@ export const createGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -19,7 +20,6 @@ export const createGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -41,6 +41,7 @@ export const updateGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -48,7 +49,6 @@ export const updateGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -70,6 +70,7 @@ export const deleteGame = /* GraphQL */ `
       images {
         items {
           id
+          owner
           targetEmotion
           fileName
           detectedEmotion
@@ -77,7 +78,6 @@ export const deleteGame = /* GraphQL */ `
           faceDetails
           createdAt
           updatedAt
-          owner
         }
         nextToken
       }
@@ -95,6 +95,7 @@ export const createImage = /* GraphQL */ `
   ) {
     createImage(input: $input, condition: $condition) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -113,7 +114,6 @@ export const createImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;
@@ -124,6 +124,7 @@ export const updateImage = /* GraphQL */ `
   ) {
     updateImage(input: $input, condition: $condition) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -142,7 +143,6 @@ export const updateImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;
@@ -153,6 +153,7 @@ export const deleteImage = /* GraphQL */ `
   ) {
     deleteImage(input: $input, condition: $condition) {
       id
+      owner
       targetEmotion
       fileName
       detectedEmotion
@@ -171,7 +172,6 @@ export const deleteImage = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
     }
   }
 `;
