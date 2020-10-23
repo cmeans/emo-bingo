@@ -9,8 +9,9 @@
       <div v-show="!turnActive">
         <v-btn
           @click="turnActive = !turnActive"
+          class="mt-2"
         >
-          Take your Turn
+          Take a Turn
         </v-btn>
         <BingoSquare :gameState="gameState" />
       </div>
@@ -18,7 +19,9 @@
     <v-overlay :absolute="true" v-show="processingEntry == true">
       <v-progress-circular
         indeterminate
-        color="primary" />
+        color="primary"
+        height="40%"
+      />
     </v-overlay>
   </div>
 </template>
@@ -26,10 +29,10 @@
 <script>
   import TakeTurn from './TakeTurn';
   import BingoSquare from './BingoSquare';
-  import { emotionsList, emotionsInfo, emotionIcons } from '../main';
+  import { emotionsList, emotionsInfo } from '../main';
   import { API, Storage /*, graphqlOperation */} from 'aws-amplify';
   import Auth from '@aws-amplify/auth';
-  import { createGame, createImage } from '../graphql/mutations';
+  import { createGame, createImage, /*createStats, getStats,*/ updateGame /*, updateStats */ } from '../graphql/mutations';
   import { listGames, listImages } from '../graphql/queries';
   import { onUpdateImage } from '../graphql/subscriptions';
 
@@ -75,7 +78,8 @@
         state: [],
         imageUpdateSubscription: null,
         minimumConfidenceLevel: 80.0,
-        processingEntry: false
+        processingEntry: false,
+        statusMessage: 'Nothing right now'
       }
     },
     watch: {
@@ -127,10 +131,13 @@
           this.availableEmotions.push(
             {
               selected: false,
-              ...emotionIcons[value.name],
+              // ...emotionIcons[value.name],
               ...value
             });
         });
+      },
+      setStatusMessage(text) {
+        this.$root.$emit('status-message', text);
       },
       stopImageUpdateSubscription() {
         console.log(`Unsubscribing from Image updates for: ${this.username}`);
@@ -139,6 +146,32 @@
           this.imageUpdateSubscription.unsubscribe();
           this.imageUpdateSubscription = null;
         }
+      },
+      async saveGameState() {
+        const data = {
+          status: 'active',
+          state: this.state,
+          availableEmotions: this.availableEmotions
+        };
+
+        const conditions = {
+          id: {
+            eq: this.activeGameId
+          }
+        };
+
+        const response =
+          await API.graphql({
+            query: updateGame,
+            variables: {
+              input: data,
+              conditions
+            }});
+
+        console.log('updated game:', response)
+      },
+      async loadGameState() {
+
       },
       async startImageUpdateSubscription() {
         console.log(`Subscribing to Image updates for: ${this.username}`);
@@ -208,7 +241,7 @@
         }
 
         state.splice(12, 0, {
-          play: PLAY.AVAILABLE,
+          play: PLAY.HIT,
           name: 'freebie',
           emotion: 'freebie'
         });
@@ -262,6 +295,8 @@
         return queryResponse.data.listImages.items;
       },
       processTurnResults(imageEntries) {
+        this.setStatusMessage('Processing the results from AWS Rekognition');
+
         console.log('processTurnResults:', imageEntries);
 
         if (imageEntries.length > 0) {
@@ -271,19 +306,15 @@
 
           switch (entry.detectedEmotion) {
             case 'fail':
-              // Error processing image (or something else),
-              // let them retry.
-              alert('fail')
+              this.setStatusMessage('Some sort of failure...sorry, try again.')
               break;
 
             case entry.targetEmotion:
               console.log('emotions match:')
               if (parseFloat(entry.confidence) >= this.minimumConfidenceLevel) {
-                console.log('Confidence: ' + parseFloat(entry.confidence))
                 // It's a hit!
                 play = PLAY.HIT;
               } else {
-                console.log("Confidence too low")
                 play = PLAY.MISS;
               }
               break;
@@ -291,31 +322,122 @@
             default:
               // It's a miss!
               play = PLAY.MISS;
-              console.log('emotions mismatch or low confidence...lost this round');
           }
 
           if (entry.detectedEmotion != 'fail') {
+            const confidence = parseFloat(entry.confidence).toFixed(2);
+
+            switch (play) {
+              case PLAY.HIT:
+                this.setStatusMessage(`You got it! <strong>${entry.targetEmotion} with ${confidence}% confidence.`);
+                break;
+              case PLAY.MISS:
+                this.setStatusMessage(`Sorry your selfie had more ${entry.detectedEmotion} with ${confidence}% confidence.`);
+                break;
+            }
+
             this.state.filter(cell => cell.name == entry.targetEmotion).forEach( cell => {
               cell.play = play;
             });
             // Flag the emotion as no-longer-available.
             this.updateAvailableEmotions(
               entry.targetEmotion);
+          } else {
+            this.setStatusMessage('Sorry, some sort of problem processing your image, try again');
+            setTimeout(() => {
+              this.setStatusMessage('');
+            },
+            10000)
           }
+        } else {
+          this.setStatusMessage('Some sort of failure...sorry, try again.')
         }
 
         this.processingEntry = false;
+
+        this.$nextTick(() => {
+          this.checkGameOver();
+        });
+      },
+      logGameWin() {
+        alert('you won!')
+      },
+      logGameLoss() {
+        alert('no way to win...you\'ve lost this game...please try again')
+      },
+      checkGameOver() {
+        const WIN = '11111';
+
+        let text, byRow, byCol, d1, d2;
+
+        // let line = this.state.map( x => '' + x.play == -1 ? ' ' : x.play).join('');
+        let line = this.state.map( x => x.play );
+
+        // Check by "rows", then by columns, then diagonally.
+
+        // By rows.
+        text = line.map( x => '' + x == -1 ? ' ': x ).join('');
+        byRow = text.match(/.{5}/g)
+
+        if (byRow.indexOf(WIN) != -1) {
+          // alert('Win by Row')
+          this.logGameWin();
+        } else {
+          // Rotate cols to rows.
+          let cols = [];
+          for (var i=0; i < 5; i++) {
+            cols = cols.concat([line[i], line[i+5], line[i+10], line[i+15], line[i+20]]);
+          }
+
+          const text2 = cols.map( x => '' + x == -1 ? ' ': x ).join('');
+          byCol = text2.match(/.{5}/g)
+
+          if (byCol.indexOf(WIN) != -1) {
+            alert('Win by Col')
+            this.logGameWin();
+          } else {
+            // 0,0 1,1 2,2 3,3 4,4
+            d1 = []
+            for (i=0; i < 5; i++) {
+              d1.push(text[i*5+i]);
+            }
+            d1 = d1.join('');
+
+            if (d1 == WIN) {
+              alert('Win by diagonal 1')
+              this.logGameWin();
+            } else {
+              // 4,0 3,1 2,2 1,3 0,4
+              d2 = []
+              for (i=5; i > 0; i--) {
+                d2.push(text[i*5 - i]);
+              }
+              d2 = d2.join('');
+              if (d2 == WIN) {
+                alert('Win by diagonal 2')
+                this.logGameWin();
+              }
+            }
+          }
+        }
+
+        // No win...but is the game over?
+        // Game is over if there's at least 1 miss in every row, col or diagonal.
+        const noRowsAvailable = byRow.every(x => x.indexOf('0') != -1);
+        const noColsAvailable = byCol.every(x => x.indexOf('0') != -1);
+        const noDiagsAvailiable = d1.indexOf('0') != -1 && d2.indexOf('0') != -1;
+
+        if (noRowsAvailable && noColsAvailable && noDiagsAvailiable) {
+          // It's a loss.
+          this.logGameLoss();
+        }
       },
       async saveTurnInfo(targetEmotion, imageFile) {
         this.processingEntry = true;
 
-        console.log(`targetEmotion: ${targetEmotion}`);
-        console.log(`image: ${imageFile}`);
-        console.log(`image file name: ${imageFile.name}`);
+        this.setStatusMessage('Sending your image to AWS Rekognition...');
 
-        // this.emotion = targetEmotion;
         this.turnActive = false;
-        // console.log(this.availableEmotions);
 
         // this.overlay = true;
         try {
@@ -332,31 +454,26 @@
                 input: data
               }});
 
-          console.log('imageEntry:');
-          console.log(response);
+          await Storage.put(
+            imageFile.name,
+            imageFile,
+            {
+              level: 'public',
+              metadata: {
+                'imageid': response.data.createImage.id
+              }
+            });
 
-          const s3Entry =
-            await Storage.put(
-              imageFile.name,
-              imageFile,
-              {
-                level: 'public',
-                metadata: {
-                  'imageid': response.data.createImage.id
-                }
-              });
+          this.setStatusMessage('Waiting for the results...');
 
-            console.log('S3 Entry:');
-            console.log(s3Entry);
-
-            setTimeout(() => {
-              console.log('listImages');
-              this.getUpdatedImageEntry(response.data.createImage.id)
-                .then(results => {
-                  this.processTurnResults(results);
-                })
-            },
-            5000)
+          setTimeout(() => {
+            console.log('listImages');
+            this.getUpdatedImageEntry(response.data.createImage.id)
+              .then(results => {
+                this.processTurnResults(results);
+              })
+          },
+          5000)
             /*
             const owner = await Auth.currentAuthenticatedUser();
 

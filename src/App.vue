@@ -3,7 +3,6 @@
     <v-app-bar
       app
       fixed
-      elevate-on-scroll
       color="black"
       dark
     >
@@ -19,7 +18,7 @@
           width="40"
         />
 
-        <v-toolbar-title>emo-Bingo</v-toolbar-title>
+        <!-- <v-toolbar-title>emo-Bingo</v-toolbar-title> -->
       </div>
 
       <!--
@@ -98,15 +97,20 @@
     <v-main>
       <router-view/>
     </v-main>
+    <Footer />
   </v-app>
 </template>
 
 <script>
 import { onAuthUIStateChange } from '@aws-amplify/ui-components';
+import Footer from '@/components/Footer';
 
 export default {
   name: 'App',
 
+  components: {
+    Footer
+  },
   created() {
     onAuthUIStateChange((authState, authData) => {
       this.authState = authState;

@@ -43,7 +43,7 @@
                 </v-chip>
               </div>
               <div class="prize-icon ma-2">
-                <img :src="item.icon" :width="item.size">
+                <img :src="emotionIcons[item.name].icon" width="50">
               </div>
             </div>
           </div>
@@ -56,6 +56,7 @@
 
 <script>
   import CurveText from '@inotom/vue-curve-text';
+  import { emotionIcons } from '../main';
 
   export default {
     name: 'SpinningWheel',
@@ -74,12 +75,8 @@
       wheelDeg: 0,
       prizeNumber: 8,
       pickedItems: [],
+      emotionIcons
     }),
-  mounted() {
-    // this.items.forEach((item) => {
-    //   item.selected = false;
-    // })
-  },
   computed: {
     prizeList() {
       return this.playedEmotions; //.slice(0, this.prizeNumber);

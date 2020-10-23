@@ -38,7 +38,7 @@
             >
             </v-file-input>
             <h3>
-              (Try to look {{ emotion }})
+              (Try to look {{ emotionReadable }})
             </h3>
           </v-col>
           <v-col cols="12" lg="4" class="text-center" v-show="previewImage">
@@ -58,7 +58,7 @@
       <div class="justify-center text-center">
         <transition name="bounce">
           <h3 v-if="previewImage">
-            Ready to Submit Your {{ emotion }} Selfie for Analysis &amp; Verification?
+            Ready to Submit Your <strong>{{ emotionReadable }}</strong> Selfie for Analysis &amp; Verification?
           </h3>
         </transition>
       </div>
@@ -105,6 +105,13 @@
       });
     },
     computed: {
+      emotionReadable() {
+        if (this.emotion == 'fear') {
+          return 'fearful';
+        }
+
+        return this.emotion;
+      },
       getPreviewImageUrl() {
         return this.previewImage;
       },

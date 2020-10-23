@@ -6,6 +6,7 @@ export const onCreateGame = /* GraphQL */ `
     onCreateGame(owner: $owner) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -32,6 +33,7 @@ export const onUpdateGame = /* GraphQL */ `
     onUpdateGame(owner: $owner) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -58,6 +60,7 @@ export const onDeleteGame = /* GraphQL */ `
     onDeleteGame(owner: $owner) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -92,6 +95,7 @@ export const onCreateImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }
@@ -118,6 +122,7 @@ export const onUpdateImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }
@@ -144,6 +149,7 @@ export const onDeleteImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }

@@ -9,6 +9,7 @@ export const createGame = /* GraphQL */ `
     createGame(input: $input, condition: $condition) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -38,6 +39,7 @@ export const updateGame = /* GraphQL */ `
     updateGame(input: $input, condition: $condition) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -67,6 +69,7 @@ export const deleteGame = /* GraphQL */ `
     deleteGame(input: $input, condition: $condition) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -104,6 +107,7 @@ export const createImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }
@@ -133,6 +137,7 @@ export const updateImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }
@@ -162,6 +167,7 @@ export const deleteImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }

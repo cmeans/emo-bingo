@@ -6,6 +6,7 @@ export const getGame = /* GraphQL */ `
     getGame(id: $id) {
       id
       state
+      availableEmotions
       images {
         items {
           id
@@ -37,6 +38,7 @@ export const listGames = /* GraphQL */ `
       items {
         id
         state
+        availableEmotions
         images {
           nextToken
         }
@@ -62,6 +64,7 @@ export const getImage = /* GraphQL */ `
       game {
         id
         state
+        availableEmotions
         images {
           nextToken
         }
@@ -93,6 +96,7 @@ export const listImages = /* GraphQL */ `
         game {
           id
           state
+          availableEmotions
           status
           createdAt
           updatedAt
@@ -160,6 +164,7 @@ export const searchImages = /* GraphQL */ `
         game {
           id
           state
+          availableEmotions
           status
           createdAt
           updatedAt

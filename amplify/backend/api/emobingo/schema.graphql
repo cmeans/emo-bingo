@@ -1,6 +1,7 @@
 type Game @model @auth(rules: [{ allow: owner }]) {
   id: ID!
   state: AWSJSON
+  availableEmotions: AWSJSON
   images: [Image] @connection(name: "GameImages")
   status: String
 }
