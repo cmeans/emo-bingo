@@ -115,9 +115,6 @@
       getPreviewImageUrl() {
         return this.previewImage;
       },
-      // showBounce() {
-      //   return true;
-      // },
       step2() {
         if (this.emotion != '') {
           return 'bounce';
@@ -126,7 +123,24 @@
         return '';
       }
     },
+    watch: {
+      emotion(newValue) {
+        if (newValue == '') {
+          this.setStatusMessage('Step 1...Click Spin');
+        } else {
+          this.setStatusMessage('Step 2...Take a Selfie');
+        }
+      },
+      imageFile(newValue) {
+        if (newValue != '') {
+          this.setStatusMessage('Step 3...Preview your Selfie and send!');
+        }
+      }
+    },
     methods: {
+      setStatusMessage(text) {
+        this.$root.$emit('status-message', text);
+      },
       doPreviewImage(file) {
         if (this.previewImage) {
           URL.revokeObjectURL(this.previewImage) // free memory

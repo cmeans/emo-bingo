@@ -8,12 +8,20 @@
     <v-slide-x-transition>
       <div v-show="!turnActive">
         <v-btn
+          @click="startNewGame"
+          v-show="gameState != 'active'"
+          class="mt-2"
+        >
+          Start a New Game
+        </v-btn>
+        <v-btn
           @click="turnActive = !turnActive"
+          v-show="gameState == 'active'"
           class="mt-2"
         >
           Take a Turn
         </v-btn>
-        <BingoSquare :gameState="gameState" />
+        <BingoSquare :gameState="boardState" />
       </div>
     </v-slide-x-transition>
     <v-overlay :absolute="true" v-show="processingEntry == true">
@@ -49,21 +57,12 @@
       TakeTurn,
       BingoSquare
     },
-    created() {
+    async created() {
       console.log("Game Component Created");
       this.init();
 
       this.initGameEventListeners();
-      this.initGameState();
-      this.initAvailableEmotions();
-
-      // this.startImageUpdateSubscription();
-
-      const _this = this;
-      this.findActiveGameId()
-        .then(() => {
-          console.log(`ActiveGameId = ${_this.activeGameId}`)
-        });
+      await this.loadOrCreateGame();
     },
     destroyed() {
       this.stopImageUpdateSubscription();
@@ -74,6 +73,7 @@
         activeGameId: 'dummy',
         targetEmotion: null,
         turnActive: false,
+        gameState: 'active',
         availableEmotions: [],
         state: [],
         imageUpdateSubscription: null,
@@ -92,7 +92,7 @@
           if (newUserName) {
             console.log('subscribing...', newUserName)
             this.startImageUpdateSubscription().then(() => {
-              console.log('good now')
+              console.log('Subscribed.')
             })
           }
         } catch (ex) {
@@ -101,29 +101,22 @@
       }
     },
     computed: {
-      gameState() {
+      boardState() {
         return this.state;
       }
     },
     methods: {
       async init() {
-        console.log('init')
         const owner = await Auth.currentAuthenticatedUser();
-        console.log(owner);
         this.username = owner.username;
-        console.log(this.username);
       },
       initGameEventListeners() {
         this.$root.$on('take-a-turn', () => {
           this.turnActive = !this.turnActive;
         });
 
-        this.$root.$on('turn-complete', (targetEmotion, image) => {
-          this.saveTurnInfo(targetEmotion, image)
-            .then(() => {
-              console.log('Saved turn info');
-              // this.updateBoard(targetEmotion);
-            })
+        this.$root.$on('turn-complete', async (targetEmotion, image) => {
+          this.processTurnInfo(targetEmotion, image);
         });
       },
       initAvailableEmotions() {
@@ -131,7 +124,6 @@
           this.availableEmotions.push(
             {
               selected: false,
-              // ...emotionIcons[value.name],
               ...value
             });
         });
@@ -147,11 +139,12 @@
           this.imageUpdateSubscription = null;
         }
       },
-      async saveGameState() {
+      async saveGameState(status) {
         const data = {
-          status: 'active',
-          state: this.state,
-          availableEmotions: this.availableEmotions
+          id: this.activeGameId,
+          status: typeof status !== undefined ? status : 'active',
+          state: JSON.stringify(this.state),
+          availableEmotions: JSON.stringify(this.availableEmotions)
         };
 
         const conditions = {
@@ -169,9 +162,6 @@
             }});
 
         console.log('updated game:', response)
-      },
-      async loadGameState() {
-
       },
       async startImageUpdateSubscription() {
         console.log(`Subscribing to Image updates for: ${this.username}`);
@@ -222,7 +212,7 @@
           }
         });
       },
-      initGameState() {
+      initBoardState() {
         let state = new Array(24);
 
         let positions = [...Array(24).keys()];
@@ -251,32 +241,51 @@
 
         this.state = state;
       },
-      async findActiveGameId() {
+      initGameState() {
+        console.log('initGameState')
+        this.initAvailableEmotions();
+        this.initBoardState();
+      },
+      async loadOrCreateGame() {
+        this.setStatusMessage('Looking for your game...');
+
         let filter = {
           status: {
-            eq: 'active' // filter status = 'active'
-          }};
+            eq: 'active'
+          }
+        };
 
         const response =
           await API.graphql({ query: listGames, variables: { filter } });
 
-        console.log(response);
-
         const foundGames = response.data.listGames.items;
 
-        this.activeGameId = (foundGames.length == 0) ? this.createNewGame().id : foundGames[0].id;
-        console.log('ActiveGameId is now: ' + this.activeGameId);
+        if (foundGames.length == 0) {
+          this.activeGameId = this.createNewGame().id
+        } else {
+          const savedGame = foundGames[0];
+
+          this.activeGameId = savedGame.id;
+          this.state = JSON.parse(savedGame.state);
+          this.availableEmotions = JSON.parse(savedGame.availableEmotions);
+        }
+
+        this.setStatusMessage('Ready...take a turn...');
       },
       async createNewGame() {
-        console.log('createNewGame')
+        this.setStatusMessage('Initializing new game...');
+
+        this.initGameState();
+
         const data = {
-          status: 'active'
-        }
+          status: 'active',
+          state: JSON.stringify(this.state),
+          availableEmotions: JSON.stringify(this.availableEmotions)
+        };
 
         const response = await API.graphql({ query: createGame, variables: { input: data } });
 
-        console.log(response.data.createGame);
-
+        this.setStatusMessage('Ready...take a turn...');
         return response.data.createGame;
       },
       async getUpdatedImageEntry(id) {
@@ -329,16 +338,21 @@
 
             switch (play) {
               case PLAY.HIT:
-                this.setStatusMessage(`You got it! <strong>${entry.targetEmotion} with ${confidence}% confidence.`);
+                this.setStatusMessage(`You got it! <strong>${entry.targetEmotion}</strong> with ${confidence}% confidence.`);
                 break;
               case PLAY.MISS:
-                this.setStatusMessage(`Sorry your selfie had more ${entry.detectedEmotion} with ${confidence}% confidence.`);
+                if (entry.detectedEmotion == entry.targetEmotion) {
+                  this.setStatusMessage(`Sorry your '${entry.detectedEmotion}' selfie confidence level was too low.`);
+                } else {
+                  this.setStatusMessage(`Sorry your selfie had more '${entry.detectedEmotion}' with ${confidence}% confidence.`);
+                }
                 break;
             }
 
             this.state.filter(cell => cell.name == entry.targetEmotion).forEach( cell => {
               cell.play = play;
             });
+
             // Flag the emotion as no-longer-available.
             this.updateAvailableEmotions(
               entry.targetEmotion);
@@ -355,29 +369,38 @@
 
         this.processingEntry = false;
 
+        this.saveGameState();
+
         this.$nextTick(() => {
           this.checkGameOver();
         });
       },
+      async startNewGame() {
+        await this.loadOrCreateGame();
+      },
       logGameWin() {
-        alert('you won!')
+        this.gameState = 'win';
+        this.saveGameState('win');
+        this.setStatusMessage('You Won!');
       },
       logGameLoss() {
-        alert('no way to win...you\'ve lost this game...please try again')
+        this.gameState = 'loss';
+        this.saveGameState('loss');
+        this.setStatusMessage('You Loose!  No way to win...please try again!')
       },
       checkGameOver() {
         const WIN = '11111';
 
-        let text, byRow, byCol, d1, d2;
+        let byCol, d1, d2;
 
-        // let line = this.state.map( x => '' + x.play == -1 ? ' ' : x.play).join('');
-        let line = this.state.map( x => x.play );
+        // Extract play state of each cell.
+        const line = this.state.map( x => x.play );
 
         // Check by "rows", then by columns, then diagonally.
 
         // By rows.
-        text = line.map( x => '' + x == -1 ? ' ': x ).join('');
-        byRow = text.match(/.{5}/g)
+        const text = line.map( x => '' + x == -1 ? ' ': x ).join('');
+        const byRow = text.match(/.{5}/g)
 
         if (byRow.indexOf(WIN) != -1) {
           // alert('Win by Row')
@@ -432,14 +455,12 @@
           this.logGameLoss();
         }
       },
-      async saveTurnInfo(targetEmotion, imageFile) {
+      async processTurnInfo(targetEmotion, imageFile) {
+        this.turnActive = false;
         this.processingEntry = true;
 
         this.setStatusMessage('Sending your image to AWS Rekognition...');
 
-        this.turnActive = false;
-
-        // this.overlay = true;
         try {
           const data = {
             targetEmotion,
@@ -466,14 +487,12 @@
 
           this.setStatusMessage('Waiting for the results...');
 
-          setTimeout(() => {
+          setTimeout(async () => {
             console.log('listImages');
-            this.getUpdatedImageEntry(response.data.createImage.id)
-              .then(results => {
-                this.processTurnResults(results);
-              })
+            const results = await this.getUpdatedImageEntry(response.data.createImage.id);
+            this.processTurnResults(results);
           },
-          5000)
+          5000);
             /*
             const owner = await Auth.currentAuthenticatedUser();
 
