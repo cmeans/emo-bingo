@@ -3,11 +3,11 @@
     <div v-show="!turnActive">
     <div class="ma-4 d-inline float-left">
       <v-chip color="green">
-        0 Wins
+        {{ gameStatsWins }}
       </v-chip>
       &nbsp;
       <v-chip color="red">
-        0 Losses
+        {{ gameStatsLosses }}
       </v-chip>
     </div>
     <v-spacer></v-spacer>
@@ -28,7 +28,7 @@
       </v-btn>
     </div>
     </div>
-    <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" />
+    <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" :gameId="activeGameId" />
     <BingoSquare v-show="!turnActive" :boardState="boardState" />
     <MessageDialog :message="dialogMessage" v-model="showDialog" />
     <v-overlay :absolute="true" v-show="processingEntry == true">
@@ -46,10 +46,10 @@
   import BingoSquare from './BingoSquare';
   import MessageDialog from './MessageDialog';
   import { emotionsList, emotionsInfo } from '../main';
-  import { API, Storage /*, graphqlOperation */} from 'aws-amplify';
+  import { API, graphqlOperation, Storage /*, graphqlOperation */} from 'aws-amplify';
   import Auth from '@aws-amplify/auth';
-  import { createGame, createImage, /*createStats, getStats,*/ updateGame /*, updateStats */ } from '../graphql/mutations';
-  import { listGames, listImages } from '../graphql/queries';
+  import { createGame, updateGame, createImage, /*getStats,*/ } from '../graphql/mutations';
+  import { listGames, getImage } from '../graphql/queries';
   import { onUpdateImage } from '../graphql/subscriptions';
 
   const PLAY = {
@@ -67,11 +67,11 @@
       MessageDialog
     },
     async created() {
-      console.log("Game Component Created");
       this.init();
 
       this.initGameEventListeners();
-      await this.loadOrCreateGame();
+      await this.loadOrCreateGame()
+        .then(() => console.log('loadOrCreated') );
     },
     destroyed() {
       this.stopImageUpdateSubscription();
@@ -89,21 +89,19 @@
         minimumConfidenceLevel: 80.0,
         processingEntry: false,
         dialogMessage: '',
-        statusMessage: 'Nothing right now'
+        statusMessage: 'Nothing right now',
+        gameStatsWins: '',
+        gameStatsLosses: ''
       }
     },
     watch: {
-      username(newUserName, oldUserName) {
+      async username(newUserName, oldUserName) {
         try {
           if (oldUserName) {
-            console.log('unsubscribing...', oldUserName)
             this.stopImageUpdateSubscription();
           }
           if (newUserName) {
-            console.log('subscribing...', newUserName)
-            this.startImageUpdateSubscription().then(() => {
-              console.log('Subscribed.')
-            })
+            await this.startImageUpdateSubscription();
           }
         } catch (ex) {
           console.log('Error subscribing:' + ex)
@@ -138,15 +136,6 @@
           async (targetEmotion, image) => {
             this.processTurnInfo(targetEmotion, image);
           });
-      },
-      initAvailableEmotions() {
-        emotionsInfo.forEach((value) => {
-          this.availableEmotions.push(
-            {
-              selected: false,
-              ...value
-            });
-        });
       },
       setStatusMessage(text) {
         this.$root.$emit('status-message', text);
@@ -232,6 +221,19 @@
           }
         });
       },
+      initAvailableEmotions() {
+        let list = [];
+
+        emotionsInfo.forEach((value) => {
+          list.push(
+            {
+              selected: false,
+              ...value
+            });
+        });
+
+        this.availableEmotions = list;
+      },
       initBoardState() {
         let state = new Array(24);
 
@@ -252,17 +254,13 @@
 
         state.splice(12, 0, {
           play: PLAY.HIT,
-          name: 'freebie',
-          emotion: 'freebie'
+          name: 'freebie'
+          // emotion: 'freebie'
         });
-
-        // Set unique key/ids.
-        // state.forEach((item, index) => { item['id'] = `${item.name}-${index}-${item.play}` });
 
         this.state = state;
       },
       initGameState() {
-        console.log('initGameState')
         this.initAvailableEmotions();
         this.initBoardState();
       },
@@ -281,7 +279,8 @@
         const foundGames = response.data.listGames.items;
 
         if (foundGames.length == 0) {
-          this.activeGameId = this.createNewGame().id
+          const newGameResponse = await this.createNewGame();
+          this.activeGameId = newGameResponse.data.createGame.id;
         } else {
           const savedGame = foundGames[0];
 
@@ -305,97 +304,65 @@
           availableEmotions: JSON.stringify(this.availableEmotions)
         };
 
-        const response = await API.graphql({ query: createGame, variables: { input: data } });
-
-        this.setStatusMessage('Ready...take a turn...');
-        return response.data.createGame;
+        return await API.graphql({
+          query: createGame,
+          variables: { input: data }
+        });
       },
-      async getUpdatedImageEntry(id) {
-        let filter = {
-          id: {
-            eq: id
-          }};
-
-        const queryResponse =
-          await API.graphql({
-            query: listImages,
-            variables: {
-              filter
-            }});
-
-        return queryResponse.data.listImages.items;
-      },
-      processTurnResults(imageEntries) {
-        this.setStatusMessage('Processing the results from AWS Rekognition');
-
-        console.log('processTurnResults:', imageEntries);
-
-        if (imageEntries.length > 0) {
-          const entry = imageEntries[0];
-
-          let play = PLAY.AVAILABLE;
-
-          switch (entry.detectedEmotion) {
-            case 'fail':
-              this.setStatusMessage('Some sort of failure...sorry, try again.')
-              break;
-
-            case entry.targetEmotion:
-              console.log('emotions match:')
-              if (parseFloat(entry.confidence) >= this.minimumConfidenceLevel) {
-                // It's a hit!
-                play = PLAY.HIT;
-              } else {
-                play = PLAY.MISS;
-              }
-              break;
-
-            default:
-              // It's a miss!
-              play = PLAY.MISS;
-          }
-
-          if (entry.detectedEmotion != 'fail') {
-            const confidence = parseFloat(entry.confidence).toFixed(2);
-
-            switch (play) {
-              case PLAY.HIT:
-                this.setStatusMessage(`You got it! '${entry.targetEmotion}' with ${confidence}% confidence.`);
-                break;
-              case PLAY.MISS:
-                if (entry.detectedEmotion == entry.targetEmotion) {
-                  this.setStatusMessage(`Sorry your '${entry.detectedEmotion}' selfie confidence level was too low.`);
-                } else {
-                  this.setStatusMessage(`Sorry your selfie had more '${entry.detectedEmotion}' with ${confidence}% confidence.`);
-                }
-                break;
-            }
-
-            this.state.filter(cell => cell.name == entry.targetEmotion).forEach( cell => {
-              cell.play = play;
-            });
-
-            // Flag the emotion as no-longer-available.
-            this.updateAvailableEmotions(
-              entry.targetEmotion);
-          } else {
-            this.setStatusMessage('Sorry, some sort of problem processing your image, try again');
-            setTimeout(() => {
-              this.setStatusMessage('');
-            },
-            10000)
-          }
-        } else {
-          this.setStatusMessage('Some sort of failure...sorry, try again.')
+      handleTurnResults(imageEntry) {
+        if (imageEntry == null) {
+          this.setStatusMessage('Some sort of failure...sorry, try again.');
+          return;
         }
 
-        this.processingEntry = false;
+        this.setStatusMessage('Processing the results from AWS Rekognition');
 
-        this.saveGameState();
+        let play = PLAY.AVAILABLE;
 
-        this.$nextTick(() => {
-          this.checkGameOver();
-        });
+        switch (imageEntry.detectedEmotion) {
+          case 'fail':
+            this.setStatusMessage('Some sort of failure...sorry, try again.')
+            break;
+
+          case imageEntry.targetEmotion:
+            console.log('emotions match:')
+            if (parseFloat(imageEntry.confidence) >= this.minimumConfidenceLevel) {
+              // It's a hit!
+              play = PLAY.HIT;
+            } else {
+              play = PLAY.MISS;
+            }
+            break;
+
+          default:
+            // It's a miss!
+            play = PLAY.MISS;
+        }
+
+        if (imageEntry.detectedEmotion != 'fail') {
+          const confidence = parseFloat(imageEntry.confidence).toFixed(2);
+
+          switch (play) {
+            case PLAY.HIT:
+              this.setStatusMessage(`You got it! '${imageEntry.targetEmotion}' with ${confidence}% confidence.`);
+              break;
+            case PLAY.MISS:
+              if (imageEntry.detectedEmotion == imageEntry.targetEmotion) {
+                this.setStatusMessage(`Sorry your '${imageEntry.detectedEmotion}' selfie confidence level was too low.`);
+              } else {
+                this.setStatusMessage(`Sorry your selfie had more '${imageEntry.detectedEmotion}' with ${confidence}% confidence.`);
+              }
+              break;
+          }
+
+          this.state.filter(cell => cell.name == imageEntry.targetEmotion).forEach( cell => {
+            cell.play = play;
+          });
+
+          // Flag the emotion as no-longer-available.
+          this.updateAvailableEmotions(
+            imageEntry.targetEmotion);
+        }
       },
       async startNewGame() {
         await this.loadOrCreateGame();
@@ -410,7 +377,7 @@
         this.saveGameState('loss');
         this.dialogMessage = "Sorry, you've lost this game, there's no way left to win!";
       },
-      checkGameOver() {
+      checkGameStatus() {
         const WIN = '11111';
 
         let byCol, d1, d2;
@@ -472,6 +439,10 @@
           // It's a loss.
           this.logGameLoss();
         }
+
+        if (this.gameState == 'active') {
+          this.saveGameState();
+        }
       },
       async processTurnInfo(targetEmotion, imageFile) {
         this.turnActive = false;
@@ -493,32 +464,52 @@
                 input: data
               }});
 
+          const imageId = response.data.createImage.id;
+
+          console.log('Image id:', imageId);
+
           await Storage.put(
             imageFile.name,
             imageFile,
             {
               level: 'public',
               metadata: {
-                'imageid': response.data.createImage.id
+                'imageid': imageId
               }
             });
 
           this.setStatusMessage('Waiting for the results...');
 
-          setTimeout(
-            async () => {
-              console.log('listImages');
-              const results =
-                await this.getUpdatedImageEntry(
-                  response.data.createImage.id);
-              this.processTurnResults(results);
-            },
-            5000);
-            /*
-            const owner = await Auth.currentAuthenticatedUser();
+          var wait = async (delay) => {
+            return new Promise(resolve => setTimeout(resolve, delay))
+          };
 
-            console.log(owner.username)
+          var checkForUpdatedImageEntry = async () => {
+            const response =
+              await API.graphql(
+                graphqlOperation(getImage, { id: imageId }));
 
+            return response.data.getImage;
+          };
+
+          let imageEntry =
+            await checkForUpdatedImageEntry();
+          while (imageEntry.detectedEmotion == null) {
+            await wait(5000);
+
+            imageEntry =
+              await checkForUpdatedImageEntry();
+          }
+
+          this.handleTurnResults(imageEntry);
+
+          this.processingEntry = false;
+
+          this.$nextTick(() => {
+            this.checkGameStatus();
+          });
+
+          /*
             // onUpdate subscription for imageEntry.id
             const subscription =
               await API.graphql(
