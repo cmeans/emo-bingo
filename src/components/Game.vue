@@ -48,8 +48,8 @@
   import { emotionsList, emotionsInfo } from '../main';
   import { API, graphqlOperation, Storage /*, graphqlOperation */} from 'aws-amplify';
   import Auth from '@aws-amplify/auth';
-  import { createGame, updateGame, createImage, /*getStats,*/ } from '../graphql/mutations';
-  import { listGames, getImage } from '../graphql/queries';
+  import { createGame, updateGame, createImage } from '../graphql/mutations';
+  import { listGames, getImage, getStats } from '../graphql/queries';
   import { onUpdateImage } from '../graphql/subscriptions';
 
   const PLAY = {
@@ -170,7 +170,11 @@
               conditions
             }});
 
-        console.log('updated game:', response)
+        console.log('Updated game:', response);
+
+        if (this.gameState != 'active') {
+          await this.updateGameStats();
+        }
       },
       async startImageUpdateSubscription() {
         console.log(`Subscribing to Image updates for: ${this.username}`);
@@ -292,6 +296,8 @@
         this.setStatusMessage('Ready...take a turn...');
         console.log(`GameId = ${this.activeGameId}`)
         this.gameState = 'active';
+
+        await this.updateGameStats();
       },
       async createNewGame() {
         this.setStatusMessage('Initializing new game...');
@@ -443,6 +449,20 @@
         if (this.gameState == 'active') {
           this.saveGameState();
         }
+      },
+      async updateGameStats() {
+        const response =
+          await API.graphql(
+            graphqlOperation(
+              getStats,
+              {
+                id: this.username
+              }));
+
+        const stats = response.data.getStats;
+
+        this.gameStatsWins = stats.wins == 1 ? '1 Win' : `${stats.wins} Wins`;
+        this.gameStatsLosses = stats.losses == 1 ? '1 Loss' : `${stats.losses} Losses`;
       },
       async processTurnInfo(targetEmotion, imageFile) {
         this.turnActive = false;
