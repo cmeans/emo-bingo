@@ -1,29 +1,36 @@
 <template>
   <div>
-    <v-slide-y-transition>
-      <v-card-text v-show="turnActive">
-        <TakeTurn :playedEmotions="availableEmotions" />
-      </v-card-text>
-    </v-slide-y-transition>
-    <v-slide-x-transition>
-      <div v-show="!turnActive">
-        <v-btn
-          @click="startNewGame"
-          v-show="gameState != 'active'"
-          class="mt-2"
-        >
-          Start a New Game
-        </v-btn>
-        <v-btn
-          @click="turnActive = !turnActive"
-          v-show="gameState == 'active'"
-          class="mt-2"
-        >
-          Take a Turn
-        </v-btn>
-        <BingoSquare :gameState="boardState" />
-      </div>
-    </v-slide-x-transition>
+    <div v-show="!turnActive">
+    <div class="ma-4 d-inline float-left">
+      <v-chip color="green">
+        0 Wins
+      </v-chip>
+      &nbsp;
+      <v-chip color="red">
+        0 Losses
+      </v-chip>
+    </div>
+    <v-spacer></v-spacer>
+    <div class="ma-2 mr-4 d-line text-right">
+      <v-btn
+        @click="startNewGame"
+        v-show="['win', 'loss'].indexOf(gameState) != -1"
+        class="mt-2"
+      >
+        Start a New Game
+      </v-btn>
+      <v-btn
+        @click.stop="turnActive=true"
+        v-show="gameState == 'active'"
+        class="mt-2"
+      >
+        Take a Turn
+      </v-btn>
+    </div>
+    </div>
+    <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" />
+    <BingoSquare v-show="!turnActive" :boardState="boardState" />
+    <MessageDialog :message="dialogMessage" v-model="showDialog" />
     <v-overlay :absolute="true" v-show="processingEntry == true">
       <v-progress-circular
         indeterminate
@@ -37,6 +44,7 @@
 <script>
   import TakeTurn from './TakeTurn';
   import BingoSquare from './BingoSquare';
+  import MessageDialog from './MessageDialog';
   import { emotionsList, emotionsInfo } from '../main';
   import { API, Storage /*, graphqlOperation */} from 'aws-amplify';
   import Auth from '@aws-amplify/auth';
@@ -55,7 +63,8 @@
 
     components: {
       TakeTurn,
-      BingoSquare
+      BingoSquare,
+      MessageDialog
     },
     async created() {
       console.log("Game Component Created");
@@ -79,6 +88,7 @@
         imageUpdateSubscription: null,
         minimumConfidenceLevel: 80.0,
         processingEntry: false,
+        dialogMessage: '',
         statusMessage: 'Nothing right now'
       }
     },
@@ -96,13 +106,21 @@
             })
           }
         } catch (ex) {
-          console.log(ex)
+          console.log('Error subscribing:' + ex)
         }
       }
     },
     computed: {
       boardState() {
         return this.state;
+      },
+      showDialog: {
+        get () {
+          return this.dialogMessage != '';
+        },
+        set () {
+          this.dialogMessage = '';
+        }
       }
     },
     methods: {
@@ -111,13 +129,15 @@
         this.username = owner.username;
       },
       initGameEventListeners() {
-        this.$root.$on('take-a-turn', () => {
-          this.turnActive = !this.turnActive;
-        });
+        // this.$root.$on('take-a-turn', () => {
+        //   this.turnActive = !this.turnActive;
+        // });
 
-        this.$root.$on('turn-complete', async (targetEmotion, image) => {
-          this.processTurnInfo(targetEmotion, image);
-        });
+        this.$root.$on(
+          'turn-complete',
+          async (targetEmotion, image) => {
+            this.processTurnInfo(targetEmotion, image);
+          });
       },
       initAvailableEmotions() {
         emotionsInfo.forEach((value) => {
@@ -271,6 +291,8 @@
         }
 
         this.setStatusMessage('Ready...take a turn...');
+        console.log(`GameId = ${this.activeGameId}`)
+        this.gameState = 'active';
       },
       async createNewGame() {
         this.setStatusMessage('Initializing new game...');
@@ -338,7 +360,7 @@
 
             switch (play) {
               case PLAY.HIT:
-                this.setStatusMessage(`You got it! <strong>${entry.targetEmotion}</strong> with ${confidence}% confidence.`);
+                this.setStatusMessage(`You got it! '${entry.targetEmotion}' with ${confidence}% confidence.`);
                 break;
               case PLAY.MISS:
                 if (entry.detectedEmotion == entry.targetEmotion) {
@@ -381,12 +403,12 @@
       logGameWin() {
         this.gameState = 'win';
         this.saveGameState('win');
-        this.setStatusMessage('You Won!');
+        this.dialogMessage = 'You Won!';
       },
       logGameLoss() {
         this.gameState = 'loss';
         this.saveGameState('loss');
-        this.setStatusMessage('You Loose!  No way to win...please try again!')
+        this.dialogMessage = "Sorry, you've lost this game, there's no way left to win!";
       },
       checkGameOver() {
         const WIN = '11111';
@@ -403,7 +425,6 @@
         const byRow = text.match(/.{5}/g)
 
         if (byRow.indexOf(WIN) != -1) {
-          // alert('Win by Row')
           this.logGameWin();
         } else {
           // Rotate cols to rows.
@@ -416,7 +437,6 @@
           byCol = text2.match(/.{5}/g)
 
           if (byCol.indexOf(WIN) != -1) {
-            alert('Win by Col')
             this.logGameWin();
           } else {
             // 0,0 1,1 2,2 3,3 4,4
@@ -427,7 +447,6 @@
             d1 = d1.join('');
 
             if (d1 == WIN) {
-              alert('Win by diagonal 1')
               this.logGameWin();
             } else {
               // 4,0 3,1 2,2 1,3 0,4
@@ -437,7 +456,6 @@
               }
               d2 = d2.join('');
               if (d2 == WIN) {
-                alert('Win by diagonal 2')
                 this.logGameWin();
               }
             }
@@ -487,12 +505,15 @@
 
           this.setStatusMessage('Waiting for the results...');
 
-          setTimeout(async () => {
-            console.log('listImages');
-            const results = await this.getUpdatedImageEntry(response.data.createImage.id);
-            this.processTurnResults(results);
-          },
-          5000);
+          setTimeout(
+            async () => {
+              console.log('listImages');
+              const results =
+                await this.getUpdatedImageEntry(
+                  response.data.createImage.id);
+              this.processTurnResults(results);
+            },
+            5000);
             /*
             const owner = await Auth.currentAuthenticatedUser();
 

@@ -1,8 +1,90 @@
 <template>
+  <v-stepper v-model="e1">
+    <v-stepper-header>
+      <v-stepper-step
+        :complete="e1 > 1"
+        step="1"
+      >
+        Spin the Wheel
+      </v-stepper-step>
+
+      <v-divider></v-divider>
+
+      <v-stepper-step
+        :complete="e1 > 2"
+        step="2"
+      >
+        Take a Selfie
+      </v-stepper-step>
+    </v-stepper-header>
+    <v-stepper-items>
+      <v-stepper-content step="1">
+        <v-card
+          class=""
+          height="370px"
+          width="90%"
+        >
+        <SpinningWheel :playedEmotions="playedEmotions" :disabled="emotion != ''"/>
+        <v-card-actions>
+          <v-btn
+            :disabled="emotion==''"
+            @click="e1 = 2"
+          >
+            Next
+          </v-btn>
+        </v-card-actions>
+        </v-card>
+
+      </v-stepper-content>
+      <v-stepper-content step="2">
+        <v-card
+          class="text-left mx-auto"
+        >
+          <v-file-input
+            required
+            show-size
+            :rules="[v => (!!v && v != [] && v != '') || 'Whacky, I know, but we need a picture for this to work']"
+            @change="doPreviewImage"
+            v-model="imageFile"
+            prepend-icon="mdi-camera"
+            label="Emotional Selfie"
+            accept="image/*.png,image/*.jpg"
+            capture="camera"
+            text-align="middle"
+          >
+          </v-file-input>
+          <p>
+            <strong>(Try to look {{ emotionReadable }})</strong>
+          </p>
+
+          <v-img
+            v-if="previewImage"
+            class="preview"
+            :src="getPreviewImageUrl"
+            width="200"
+            scale="1"
+          >
+          </v-img>
+          <p v-if="previewImage">
+          Ready to Submit Your <strong>{{ emotionReadable }}</strong> Selfie for Analysis &amp; Verification?
+          </p>
+          <v-card-actions>
+            <v-btn
+              :disabled="!previewImage"
+              @click="submitSelfie"
+            >
+              Submit Selfie
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-stepper-content>
+    </v-stepper-items>
+  </v-stepper>
+
+  <!--
   <v-card
-    outline
-    elevation="2"
-    class=""
+    elevation="6"
+    class="mx-auto"
   >
     <v-card-title>
       Click the spinner to see which emotion you must present.
@@ -54,14 +136,16 @@
             </v-img>
           </v-col>
         </v-row>
-      </v-container>
+        <v-row>
+          <v-col cols="12">
       <div class="justify-center text-center">
-        <transition name="bounce">
           <h3 v-if="previewImage">
             Ready to Submit Your <strong>{{ emotionReadable }}</strong> Selfie for Analysis &amp; Verification?
           </h3>
-        </transition>
       </div>
+          </v-col>
+        </v-row>
+      </v-container>
     </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn
@@ -72,6 +156,7 @@
       </v-btn>
     </v-card-actions>
   </v-card>
+  //-->
 </template>
 
 <script>
@@ -82,8 +167,7 @@
       emotion: '',
       imageFile: [],
       previewImage: '',
-      showBounce: false,
-      step3: ''
+      e1: 1
     };
   }
 
@@ -96,13 +180,14 @@
     props: [
       'playedEmotions'
     ],
-    data: () => {
-      return getDefaultData();
-    },
+    data: () => getDefaultData(),
     mounted() {
       this.$root.$on('emotion', (text) => {
         this.emotion = text;
       });
+
+      this.step = 1;
+      console.log(this.scope)
     },
     computed: {
       emotionReadable() {
@@ -123,24 +208,7 @@
         return '';
       }
     },
-    watch: {
-      emotion(newValue) {
-        if (newValue == '') {
-          this.setStatusMessage('Step 1...Click Spin');
-        } else {
-          this.setStatusMessage('Step 2...Take a Selfie');
-        }
-      },
-      imageFile(newValue) {
-        if (newValue != '') {
-          this.setStatusMessage('Step 3...Preview your Selfie and send!');
-        }
-      }
-    },
     methods: {
-      setStatusMessage(text) {
-        this.$root.$emit('status-message', text);
-      },
       doPreviewImage(file) {
         if (this.previewImage) {
           URL.revokeObjectURL(this.previewImage) // free memory
@@ -161,13 +229,14 @@
         this.$root.$emit(
           'turn-complete',
           this.emotion,
-          this.imageFile
-          );
+          this.imageFile);
+
         this.resetData();
       }
     }
   }
 </script>
+
 <style scoped>
   .selfie {
     background-image: url('/images/selfie.png');

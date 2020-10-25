@@ -10,7 +10,7 @@
     </div>
   </div>
   <div class="square-container">
-    <div class="square" v-for="entry in gameState" :key="entry.id">
+    <div class="square" v-for="entry in boardState" :key="entry.id">
       <v-card class="cell" @click="showCellInfoDialog(entry.name)">
         <v-card-text class="pa-0 pt-2 pb-2">
           <div align="center">
@@ -53,7 +53,7 @@
     },
     props: [
       'playedEmotions',
-      'gameState'
+      'boardState'
     ],
     data: () => ({
       emotionIcons,
@@ -76,9 +76,6 @@
       }
     },
     methods: {
-      // entry(row, col) {
-      //   return this.gameState[row * 5 + col];
-      // },
       entryOverlay(play) {
         if (play == 0) {
           return '/images/cross-mark.png' // Miss.

@@ -91,7 +91,7 @@
     },
     {
       icon: `${path}aws-cloudformation.png`,
-      title: 'AWS Cloudformation',
+      title: 'Cloudformation',
       url: 'https://aws.amazon.com/cloudformation'
     },
     {
