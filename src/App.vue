@@ -18,7 +18,13 @@
           width="40"
         />
 
-        <!-- <v-toolbar-title>emo-Bingo</v-toolbar-title> -->
+        <v-toolbar-title class="d-none d-md-block">emo-Bingo</v-toolbar-title>
+        <v-btn
+          @click="$router.push({ path: '/instructions' }).catch(err => {})"
+          class="ml-4 d-none d-md-block"
+        >
+          Instructions / Help
+        </v-btn>
       </div>
 
       <!--

@@ -2,11 +2,17 @@
   <div>
     <div v-show="!turnActive">
     <div class="ma-4 d-inline float-left">
-      <v-chip color="green">
+      <v-chip
+        color="green"
+        text-color="white"
+      >
         {{ gameStatsWins }}
       </v-chip>
       &nbsp;
-      <v-chip color="red">
+      <v-chip
+        color="red"
+        text-color="white"
+      >
         {{ gameStatsLosses }}
       </v-chip>
     </div>
