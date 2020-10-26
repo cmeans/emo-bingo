@@ -56,16 +56,16 @@
   const instructions = [
     "The goal, is to get five \"cells\" in a row.",
     "The row can be horizontal, vertical or diagonal.",
-    "Each cell (other than the center cell) indicates an emotion.  (Don't Panic...it's not one of them.)",
+    "Each cell (other than the center cell) indicates an emotion.",
     "At the start of each game emotions are assigned randomly to each cell on the board.",
-    "Some, or all, of the emotions will be duplicated on the board.",
-    "You claim the cell by taking a selfie where you are presenting (exhibiting) that emotion (you do not need to be feeling the emotion, AWS Rekognition can't actually tell how you feel).",
+    "Each emotion will be present on 3 cells of the board.",
+    "You win cells by taking a selfie where you are presenting (exhibiting) that emotion (you do not need to be feeling the emotion, AWS Rekognition can't actually tell how you feel).",
     "On each turn, you spin a wheel to see which emotion you must try for.",
     "You will only get each emotion, at most, once per game.",
     "Then you'll take your \"emotional\" selfie, there's a preview window, so you'll have an option to retake the image (as many times as you like).",
     "Submit the image for analysis...when we get the results back, the board will be updated.",
-    "The board is updated with success or failure for your selfie to match the requested emotion.",
-    "You'll loose if all the squares are Xd out, or if it's not possible to win because too many cells are fails.",
+    "The board is updated with success or failure for your selfie to match the requested emotion with 80% or higher confidence.",
+    "You'll loose the game if it's not possible to win because too many cells are lost.",
     "The center cell is a freebie (you're welcome!)"
   ];
 
