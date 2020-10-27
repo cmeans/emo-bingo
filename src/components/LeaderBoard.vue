@@ -21,7 +21,7 @@
         :items="items"
         :search="search"
         sort-by="wins"
-        sort-desc="true"
+        :sort-desc=true
       ></v-data-table>
       <v-card-actions>
         <v-spacer></v-spacer>

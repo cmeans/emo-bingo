@@ -7,8 +7,13 @@
     <v-card>
       <v-card-title class="headline">
         {{ title }}
+        <!-- <v-img
+          contain
+          width="50%"
+          :src="imageUrl">
+        </v-img> -->
       </v-card-title>
-      <v-card-text v-html="message" />
+      <v-card-text v-html="message" class="big"/>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
@@ -46,3 +51,8 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+.big {
+  font-size: 22px;
+}
+</style>

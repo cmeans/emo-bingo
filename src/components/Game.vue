@@ -45,9 +45,14 @@
         </v-btn>
       </div>
     </div>
-    <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" :gameId="activeGameId" />
-    <BingoSquare v-show="!turnActive" :boardState="boardState" :activeEmotion="targetEmotion">
-    </BingoSquare>
+    <TakeTurn
+      v-show="turnActive"
+      :playedEmotions="availableEmotions"
+      :gameId="activeGameId" />
+    <BingoSquare
+      v-show="!turnActive"
+      :boardState="boardState"
+      :activeEmotion="targetEmotion" />
     <p v-show="!turnActive" class="text-center ma-4">
       {{ waysToWin }}
     </p>
@@ -99,6 +104,7 @@
         .then(() => console.log('loadOrCreated') );
     },
     destroyed() {
+      this.stopGameWon();
       this.stopImageUpdateSubscription();
     },
     data() {
@@ -126,6 +132,7 @@
       }
     },
     watch: {
+      /*
       async username(newUserName, oldUserName) {
         try {
           if (oldUserName) {
@@ -138,6 +145,7 @@
           console.log('Error subscribing:' + ex)
         }
       }
+      */
     },
     computed: {
       boardState() {
@@ -159,7 +167,8 @@
           'turn-complete',
           async (targetEmotion, image) => {
             this.targetEmotion = targetEmotion;
-            this.processTurnInfo(targetEmotion, image)
+
+            await this.processTurnInfo(targetEmotion, image)
               .then(() => this.targetEmotion = '');
           });
       },
@@ -199,9 +208,9 @@
         console.log('Updated game:', response);
 
         if (['win', 'loss'].includes(status)) {
-          await this.updateGameStats();
+          await this.getGameStats();
         } else {
-          // this.computeGameStatus();
+          this.computeGameStatus();
           this.updateWaysToWin();
         }
       },
@@ -334,7 +343,7 @@
         console.log(`GameId = ${this.activeGameId}`)
         this.gameState = 'active';
 
-        await this.updateGameStats();
+        await this.getGameStats();
       },
       async createNewGame() {
         this.setStatusMessage('Initializing new game...');
@@ -414,7 +423,7 @@
         }
       },
       async startNewGame() {
-        this.$confetti.stop();
+        this.stopGameWon();
         await this.loadOrCreateGame();
       },
       async logGameWin() {
@@ -422,25 +431,12 @@
         this.gameState = 'win';
         await this.saveGameState('win');
 
-        this.$confetti.start({
-          particles: [{
-            type: 'image',
-            url: '/images/jack-o-lantern.png',
-            size: 30
-          }, {
-            type: 'circle'
-          }, {
-            type: 'rect'
-          }],
-          defaultColors: [
-            'purple',
-            'orange',
-            'black'
-          ]});
+        this.startGameWon();
       },
       async logGameLoss() {
         this.dialogMessage += "<br/><br/><i>Sorry, you've lost this game, there's no way left to win!</i>";
         this.gameState = 'loss';
+
         await this.saveGameState('loss');
       },
       computeGameStatus() {
@@ -491,56 +487,6 @@
             || this.gameStatus.d2 == WIN) {
           await this.logGameWin();
         }
-        /*
-        let byCol, d1, d2;
-
-        // Extract play state of each cell.
-        const line = this.state.map( x => x.play );
-
-        // Check by "rows", then by columns, then diagonally.
-
-        // By rows.
-        const text = line.map( x => '' + x == -1 ? ' ': x ).join('');
-        const byRow = text.match(/.{5}/g)
-
-        if (byRow.indexOf(WIN) != -1) {
-          await this.logGameWin();
-        } else {
-          // Rotate cols to rows.
-          let cols = [];
-          for (var i=0; i < 5; i++) {
-            cols = cols.concat([line[i], line[i+5], line[i+10], line[i+15], line[i+20]]);
-          }
-
-          const text2 = cols.map( x => '' + x == -1 ? ' ': x ).join('');
-          byCol = text2.match(/.{5}/g)
-
-          if (byCol.indexOf(WIN) != -1) {
-            await this.logGameWin();
-          } else {
-            // 0,0 1,1 2,2 3,3 4,4
-            d1 = []
-            for (i=0; i < 5; i++) {
-              d1.push(text[i*5+i]);
-            }
-            d1 = d1.join('');
-
-            if (d1 == WIN) {
-              await this.logGameWin();
-            } else {
-              // 4,0 3,1 2,2 1,3 0,4
-              d2 = []
-              for (i=5; i > 0; i--) {
-                d2.push(text[i*5 - i]);
-              }
-              d2 = d2.join('');
-              if (d2 == WIN) {
-                await this.logGameWin();
-              }
-            }
-          }
-        }
-        */
 
         // No win...but is the game over?
         // Game is over if there's at least 1 miss in every row, col or diagonal.
@@ -560,27 +506,28 @@
         }
       },
       updateWaysToWin() {
-          const rowsAvailable = this.gameStatus.byRow.filter(x => x.indexOf('0') == -1).length;
-          const colsAvailable = this.gameStatus.byCol.filter(x => x.indexOf('0') == -1).length;
-          const diagsAvailable = (this.gameStatus.d1.indexOf('0') == -1 ? 1 : 0) + (this.gameStatus.d2.indexOf('0') == -1 ? 1 : 0);
+        const rowsAvailable = this.gameStatus.byRow.filter(x => x.indexOf('0') == -1).length;
+        const colsAvailable = this.gameStatus.byCol.filter(x => x.indexOf('0') == -1).length;
+        const diagsAvailable = (this.gameStatus.d1.indexOf('0') == -1 ? 1 : 0) + (this.gameStatus.d2.indexOf('0') == -1 ? 1 : 0);
 
-          let list = [];
-          if (rowsAvailable > 0) {
-            list.push(`${rowsAvailable} row${rowsAvailable == 1 ? '': 's'}`);
-          }
-          if (colsAvailable > 0) {
-            list.push(`${colsAvailable} column${colsAvailable == 1 ? '': 's'}`);
-          }
-          if (diagsAvailable > 0) {
-            list.push(`${diagsAvailable} diagonal${diagsAvailable == 1 ? '': 's'}`);
-          }
+        let list = [];
+        if (rowsAvailable > 0) {
+          list.push(`${rowsAvailable} row${rowsAvailable == 1 ? '': 's'}`);
+        }
+        if (colsAvailable > 0) {
+          list.push(`${colsAvailable} column${colsAvailable == 1 ? '': 's'}`);
+        }
+        if (diagsAvailable > 0) {
+          list.push(`${diagsAvailable} diagonal${diagsAvailable == 1 ? '': 's'}`);
+        }
 
-          const count = rowsAvailable + colsAvailable + diagsAvailable;
+        const count = rowsAvailable + colsAvailable + diagsAvailable;
 
-          this.waysToWin = `You have ${count} way${count == 1 ? '' : 's'} remaining to win: ${list.join(', ')}`;
+        this.waysToWin = `You have ${count} way${count == 1 ? '' : 's'} remaining to win: ${list.join(', ')}`;
       },
-      async updateGameStats() {
-        console.log('Update Game')
+      async getGameStats() {
+        console.log('Get Game Stats');
+
         const response =
           await API.graphql(
             graphqlOperation(
@@ -591,8 +538,8 @@
 
         const stats = response.data.getStats;
 
-        this.gameStatsWins = stats.wins == 1 ? '1 Win' : `${stats.wins} Wins`;
-        this.gameStatsLosses = stats.losses == 1 ? '1 Loss' : `${stats.losses} Losses`;
+        this.gameStatsWins = `${stats.wins} Win${stats.wins == 1 ? '' : 's'}`;
+        this.gameStatsLosses = `${stats.losses} Loss${stats.losses == 1 ? '' : 'es'}`;
 
         if (this.freshGame && (stats.wins + stats.losses) == 0) {
           this.$router.push({ path: '/instructions' });
@@ -641,7 +588,10 @@
           var checkForUpdatedImageEntry = async () => {
             const response =
               await API.graphql(
-                graphqlOperation(getImage, { id: imageId }));
+                graphqlOperation(
+                  getImage, {
+                  id: imageId
+                }));
 
             return response.data.getImage;
           };
@@ -657,40 +607,41 @@
 
           this.processingEntry = false;
 
-          this.$nextTick(() => {
-            this.handleTurnResults(imageEntry);
+          this.$nextTick(
+            async () => {
+              this.handleTurnResults(imageEntry);
 
-            this.checkGameStatus();
-          });
-
-          /*
-            // onUpdate subscription for imageEntry.id
-            const subscription =
-              await API.graphql(
-                graphqlOperation(
-                  onUpdateImage,
-                  {
-                    owner: owner.username
-                  }
-                )
-              ).subscribe({
-                next: (image) => {
-                  console.log('Subscription Image Update:');
-                  alert(image);
-                  subscription.unsubscribe();
-                }
-              })
-            */
+              await this.checkGameStatus();
+            });
         }
         finally {
           // this.overlay = false;
         }
+      },
+      startGameWon() {
+        this.$confetti.start({
+          particles: [{
+            type: 'image',
+            url: '/images/jack-o-lantern.png',
+            size: 30
+          }, {
+            type: 'circle'
+          }, {
+            type: 'rect'
+          }],
+          defaultColors: [
+            'purple',
+            'orange',
+            'black'
+          ]});
+
+          setTimeout(
+            () => this.stopGameWon(),
+            20000);
+      },
+      stopGameWon() {
+        this.$confetti.stop();
       }
     }
   }
 </script>
-<style lang="scss" scoped>
-.pointer {
-  cursor: hand;
-}
-</style>
