@@ -1,52 +1,56 @@
 <template>
   <div>
-  <div v-show="!turnActive">
-    <div
-      class="float-left mt-1 ml-4">
-      <v-chip
-        color="green"
-        text-color="white"
+    <div v-show="!turnActive">
+      <div
+        class="float-left mt-1 ml-4">
+        <v-chip
+          color="green"
+          text-color="white"
+        >
+          {{ gameStatsWins }}
+        </v-chip>
+        &nbsp;
+        <v-chip
+          color="red"
+          text-color="white"
+        >
+          {{ gameStatsLosses }}
+        </v-chip>
+        &nbsp;
+        <v-btn
+          @click="leaderBoardShow=true"
+          icon
+          color="primary"
+        >
+          <v-icon>
+            mdi-clipboard-list
+          </v-icon>
+        </v-btn>
+      </div>
+      <v-spacer></v-spacer>
+      <div
+        class="text-right mt-1 mr-4"
       >
-        {{ gameStatsWins }}
-      </v-chip>
-      &nbsp;
-      <v-chip
-        color="red"
-        text-color="white"
-      >
-        {{ gameStatsLosses }}
-      </v-chip>
-      &nbsp;
-      <v-btn
-        @click="leaderBoardShow=true"
-        icon
-        color="primary"
-      >
-        <v-icon>
-          mdi-clipboard-list
-        </v-icon>
-      </v-btn>
+        <v-btn
+          @click="startNewGame"
+          v-show="['win', 'loss'].indexOf(gameState) != -1"
+        >
+          New Game
+        </v-btn>
+        <v-btn
+          @click.stop="turnActive=true"
+          v-show="gameState == 'active'"
+        >
+          Take a Turn
+        </v-btn>
+      </div>
     </div>
-    <v-spacer></v-spacer>
-    <div
-      class="text-right mt-1 mr-4"
-    >
-      <v-btn
-        @click="startNewGame"
-        v-show="['win', 'loss'].indexOf(gameState) != -1"
-      >
-        New Game
-      </v-btn>
-      <v-btn
-        @click.stop="turnActive=true"
-        v-show="gameState == 'active'"
-      >
-        Take a Turn
-      </v-btn>
-    </div>
-  </div>
     <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" :gameId="activeGameId" />
-    <BingoSquare v-show="!turnActive" :boardState="boardState" :activeEmotion="targetEmotion" />
+    <BingoSquare v-show="!turnActive" :boardState="boardState" :activeEmotion="targetEmotion">
+    </BingoSquare>
+    <p v-show="!turnActive" class="text-center ma-4">
+      {{ waysToWin }}
+    </p>
     <MessageDialog :title="dialogTitle" :message="dialogMessage" v-model="dialogShow" />
     <LeaderBoard v-model="leaderBoardShow" />
     <v-overlay :absolute="true" v-show="processingEntry">
@@ -116,7 +120,9 @@
         freshGame: false,
         gameStatsWins: '',
         gameStatsLosses: '',
-        leaderBoardShow: false
+        leaderBoardShow: false,
+        waysToWin: '',
+        gameStatus: null
       }
     },
     watch: {
@@ -194,6 +200,9 @@
 
         if (['win', 'loss'].includes(status)) {
           await this.updateGameStats();
+        } else {
+          // this.computeGameStatus();
+          this.updateWaysToWin();
         }
       },
       async startImageUpdateSubscription() {
@@ -289,7 +298,7 @@
         this.initBoardState();
       },
       async loadOrCreateGame() {
-        this.setStatusMessage('Looking for your game...');
+        this.setStatusMessage('Looking for an active game...');
 
         let filter = {
           status: {
@@ -298,7 +307,11 @@
         };
 
         const response =
-          await API.graphql({ query: listGames, variables: { filter } });
+          await API.graphql({
+            query: listGames,
+            variables: {
+              filter
+            }});
 
         const foundGames = response.data.listGames.items;
 
@@ -312,6 +325,9 @@
           this.activeGameId = savedGame.id;
           this.state = JSON.parse(savedGame.state);
           this.availableEmotions = JSON.parse(savedGame.availableEmotions);
+
+          this.computeGameStatus();
+          this.updateWaysToWin();
         }
 
         this.setStatusMessage('Ready...take a turn...');
@@ -427,9 +443,55 @@
         this.gameState = 'loss';
         await this.saveGameState('loss');
       },
+      computeGameStatus() {
+        let status = {};
+
+        // Extract play state of each cell.
+        const line = this.state.map( x => x.play );
+
+        // Check by "rows", then by columns, then diagonally.
+
+        // By rows.
+        const text = line.map( x => '' + x == -1 ? ' ': x ).join('');
+        status.byRow = text.match(/.{5}/g)
+
+        // Rotate cols to rows.
+        let cols = [];
+        for (var i=0; i < 5; i++) {
+          cols = cols.concat([line[i], line[i+5], line[i+10], line[i+15], line[i+20]]);
+        }
+
+        const text2 = cols.map( x => '' + x == -1 ? ' ': x ).join('');
+        status.byCol = text2.match(/.{5}/g)
+
+        // 0,0 1,1 2,2 3,3 4,4
+        let d1 = []
+        for (i=0; i < 5; i++) {
+          d1.push(text[i*5+i]);
+        }
+        status.d1 = d1.join('');
+
+        // 4,0 3,1 2,2 1,3 0,4
+        let d2 = []
+        for (i=5; i > 0; i--) {
+          d2.push(text[i*5 - i]);
+        }
+        status.d2 = d2.join('');
+
+        this.gameStatus = status;
+      },
       async checkGameStatus() {
+        this.computeGameStatus();
+
         const WIN = '11111';
 
+        if (   this.gameStatus.byRow.indexOf(WIN) != -1
+            || this.gameStatus.byCol.indexOf(WIN) != -1
+            || this.gameStatus.d1 == WIN
+            || this.gameStatus.d2 == WIN) {
+          await this.logGameWin();
+        }
+        /*
         let byCol, d1, d2;
 
         // Extract play state of each cell.
@@ -478,12 +540,13 @@
             }
           }
         }
+        */
 
         // No win...but is the game over?
         // Game is over if there's at least 1 miss in every row, col or diagonal.
-        const noRowsAvailable = byRow.every(x => x.indexOf('0') != -1);
-        const noColsAvailable = byCol.every(x => x.indexOf('0') != -1);
-        const noDiagsAvailiable = d1.indexOf('0') != -1 && d2.indexOf('0') != -1;
+        const noRowsAvailable = this.gameStatus.byRow.every(x => x.indexOf('0') != -1);
+        const noColsAvailable = this.gameStatus.byCol.every(x => x.indexOf('0') != -1);
+        const noDiagsAvailiable = this.gameStatus.d1.indexOf('0') != -1 && this.gameStatus.d2.indexOf('0') != -1;
 
         if (noRowsAvailable && noColsAvailable && noDiagsAvailiable) {
           // It's a loss.
@@ -492,7 +555,29 @@
 
         if (this.gameState == 'active') {
           await this.saveGameState();
+        } else {
+          this.waysToWin = '';
         }
+      },
+      updateWaysToWin() {
+          const rowsAvailable = this.gameStatus.byRow.filter(x => x.indexOf('0') == -1).length;
+          const colsAvailable = this.gameStatus.byCol.filter(x => x.indexOf('0') == -1).length;
+          const diagsAvailable = (this.gameStatus.d1.indexOf('0') == -1 ? 1 : 0) + (this.gameStatus.d2.indexOf('0') == -1 ? 1 : 0);
+
+          let list = [];
+          if (rowsAvailable > 0) {
+            list.push(`${rowsAvailable} row${rowsAvailable == 1 ? '': 's'}`);
+          }
+          if (colsAvailable > 0) {
+            list.push(`${colsAvailable} column${colsAvailable == 1 ? '': 's'}`);
+          }
+          if (diagsAvailable > 0) {
+            list.push(`${diagsAvailable} diagonal${diagsAvailable == 1 ? '': 's'}`);
+          }
+
+          const count = rowsAvailable + colsAvailable + diagsAvailable;
+
+          this.waysToWin = `You have ${count} way${count == 1 ? '' : 's'} remaining to win: ${list.join(', ')}`;
       },
       async updateGameStats() {
         console.log('Update Game')
