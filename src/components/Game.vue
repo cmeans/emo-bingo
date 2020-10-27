@@ -373,8 +373,8 @@
             cell.play = play;
           });
 
-          this.showDialog('Analysis Result', message);
           this.setStatusMessage('Ready...');
+          this.showDialog('Analysis Result', message);
 
           // Flag the emotion as no-longer-available.
           this.updateAvailableEmotions(
@@ -552,11 +552,11 @@
               await checkForUpdatedImageEntry();
           }
 
-          this.handleTurnResults(imageEntry);
-
           this.processingEntry = false;
 
           this.$nextTick(() => {
+            this.handleTurnResults(imageEntry);
+
             this.checkGameStatus();
           });
 
