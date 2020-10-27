@@ -20,8 +20,9 @@
     <v-stepper-items>
       <v-stepper-content step="1">
         <v-card
-          class=""
-          height="370px"
+          elevation="0"
+          padless
+          height="360px"
           width="90%"
         >
         <SpinningWheel
@@ -47,7 +48,10 @@
       </v-stepper-content>
       <v-stepper-content step="2">
         <v-card
-          class="text-left mx-auto"
+          elevation="0"
+          padless
+          class="text-left"
+          width="90%"
         >
           <v-file-input
             required

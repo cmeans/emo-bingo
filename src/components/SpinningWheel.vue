@@ -1,8 +1,8 @@
 <template>
   <v-card
     elevation="0"
-    class="ma-4"
-    height="310"
+    class="ma-2"
+    height="300"
     width="310"
   >
     <div class="wheel-wrapper">
