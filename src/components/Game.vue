@@ -479,6 +479,7 @@
         }
       },
       async updateGameStats() {
+        console.log('Update Game')
         const response =
           await API.graphql(
             graphqlOperation(
