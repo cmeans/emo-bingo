@@ -176,7 +176,7 @@
 
         console.log('Updated game:', response);
 
-        if (this.gameState != 'active') {
+        if (['win', 'loss'].includes(status)) {
           await this.updateGameStats();
         }
       },
@@ -385,10 +385,11 @@
         this.$confetti.stop();
         await this.loadOrCreateGame();
       },
-      logGameWin() {
-        this.gameState = 'win';
-        this.saveGameState('win');
+      async logGameWin() {
         this.dialogMessage += '<br/><br/><strong>And, you Won!</strong>';
+        this.gameState = 'win';
+        await this.saveGameState('win');
+
         this.$confetti.start({
           particles: [{
             type: 'image',
@@ -405,12 +406,12 @@
             'black'
           ]});
       },
-      logGameLoss() {
-        this.gameState = 'loss';
-        this.saveGameState('loss');
+      async logGameLoss() {
         this.dialogMessage += "<br/><br/><i>Sorry, you've lost this game, there's no way left to win!</i>";
+        this.gameState = 'loss';
+        await this.saveGameState('loss');
       },
-      checkGameStatus() {
+      async checkGameStatus() {
         const WIN = '11111';
 
         let byCol, d1, d2;
@@ -425,7 +426,7 @@
         const byRow = text.match(/.{5}/g)
 
         if (byRow.indexOf(WIN) != -1) {
-          this.logGameWin();
+          await this.logGameWin();
         } else {
           // Rotate cols to rows.
           let cols = [];
@@ -437,7 +438,7 @@
           byCol = text2.match(/.{5}/g)
 
           if (byCol.indexOf(WIN) != -1) {
-            this.logGameWin();
+            await this.logGameWin();
           } else {
             // 0,0 1,1 2,2 3,3 4,4
             d1 = []
@@ -447,7 +448,7 @@
             d1 = d1.join('');
 
             if (d1 == WIN) {
-              this.logGameWin();
+              await this.logGameWin();
             } else {
               // 4,0 3,1 2,2 1,3 0,4
               d2 = []
@@ -456,7 +457,7 @@
               }
               d2 = d2.join('');
               if (d2 == WIN) {
-                this.logGameWin();
+                await this.logGameWin();
               }
             }
           }
@@ -470,11 +471,11 @@
 
         if (noRowsAvailable && noColsAvailable && noDiagsAvailiable) {
           // It's a loss.
-          this.logGameLoss();
+          await this.logGameLoss();
         }
 
         if (this.gameState == 'active') {
-          this.saveGameState();
+          await this.saveGameState();
         }
       },
       async updateGameStats() {
