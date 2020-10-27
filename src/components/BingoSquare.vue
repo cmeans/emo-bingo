@@ -27,15 +27,13 @@
               v-bind:style="{ width: size }"
             />
           </div>
-          <v-overlay :absolute="true" v-show="entry.play != -1">
-          <transition name="flip" mode="out-in">
+          <v-overlay :absolute="true" v-show="entry.play != -1" style="z-index: 3">
             <v-img
               contain
               :src="entryOverlay(entry.play)"
               width="80"
             >
             </v-img>
-          </transition>
           </v-overlay>
         </v-card-text>
       </v-card>
