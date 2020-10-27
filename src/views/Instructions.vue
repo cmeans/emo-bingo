@@ -15,7 +15,7 @@
       <v-btn
         block
         @click="$router.push({ path: '/' }).catch(err => {})">
-        Start the Game
+        Return to the Game
       </v-btn>
       <v-card-text class="text-left">
         <v-list
@@ -26,7 +26,7 @@
             :key="index"
           >
             <v-list-item-content>
-              <v-list-item-title v-text="text" />
+              <v-list-item-title>{{index + 1}}. {{text}}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -57,7 +57,7 @@
       <v-btn
         block
         @click="$router.push({ path: '/' }).catch(err => {})">
-        Start the Game
+        Return to the Game
       </v-btn>
     </v-card>
   </div>
@@ -65,7 +65,7 @@
 <script>
   const instructions = [
     "This is a single player game.",
-    "There may be time for a leader-board, but don't get your hopes up.",
+    "There is a leader-board (the button next to the Wins & Losses). Impress co-workers with your ability to emote!",
     "The goal, is to get five \"cells\" in a row.",
     "The row can be horizontal, vertical or diagonal.",
     "Each cell (other than the center cell) indicates an emotion.",

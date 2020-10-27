@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div v-show="!turnActive">
-    <div class="ma-4 d-inline float-left">
+  <div v-show="!turnActive">
+    <div
+      class="float-left mt-1 ml-4">
       <v-chip
         color="green"
         text-color="white"
@@ -15,33 +16,45 @@
       >
         {{ gameStatsLosses }}
       </v-chip>
+      &nbsp;
+      <v-btn
+        @click="leaderBoardShow=true"
+        icon
+        color="primary"
+      >
+        <v-icon>
+          mdi-clipboard-list
+        </v-icon>
+      </v-btn>
     </div>
     <v-spacer></v-spacer>
-    <div class="ma-2 mr-4 d-line text-right">
+    <div
+      class="text-right mt-1 mr-4"
+    >
       <v-btn
         @click="startNewGame"
         v-show="['win', 'loss'].indexOf(gameState) != -1"
-        class="mt-2"
       >
-        Start a New Game
+        New Game
       </v-btn>
       <v-btn
         @click.stop="turnActive=true"
         v-show="gameState == 'active'"
-        class="mt-2"
       >
         Take a Turn
       </v-btn>
     </div>
-    </div>
+  </div>
     <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" :gameId="activeGameId" />
     <BingoSquare v-show="!turnActive" :boardState="boardState" :activeEmotion="targetEmotion" />
     <MessageDialog :title="dialogTitle" :message="dialogMessage" v-model="dialogShow" />
-    <v-overlay :absolute="true" v-show="processingEntry == true">
+    <LeaderBoard v-model="leaderBoardShow" />
+    <v-overlay :absolute="true" v-show="processingEntry">
       <v-progress-circular
         indeterminate
+        size="70"
+        width="7"
         color="primary"
-        height="40%"
       />
     </v-overlay>
   </div>
@@ -51,6 +64,7 @@
   import TakeTurn from './TakeTurn';
   import BingoSquare from './BingoSquare';
   import MessageDialog from './MessageDialog';
+  import LeaderBoard from './LeaderBoard';
   import { emotionsList, emotionsInfo } from '../main';
   import { API, graphqlOperation, Storage /*, graphqlOperation */} from 'aws-amplify';
   import Auth from '@aws-amplify/auth';
@@ -70,7 +84,8 @@
     components: {
       TakeTurn,
       BingoSquare,
-      MessageDialog
+      MessageDialog,
+      LeaderBoard
     },
     async created() {
       this.init();
@@ -100,7 +115,8 @@
         statusMessage: 'Nothing right now',
         freshGame: false,
         gameStatsWins: '',
-        gameStatsLosses: ''
+        gameStatsLosses: '',
+        leaderBoardShow: false
       }
     },
     watch: {
@@ -588,3 +604,8 @@
     }
   }
 </script>
+<style lang="scss" scoped>
+.pointer {
+  cursor: hand;
+}
+</style>
