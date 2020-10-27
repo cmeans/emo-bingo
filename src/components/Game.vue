@@ -7,14 +7,14 @@
           color="green"
           text-color="white"
         >
-          {{ gameStatsWins }}
+          {{ getWins }}
         </v-chip>
         &nbsp;
         <v-chip
           color="red"
           text-color="white"
         >
-          {{ gameStatsLosses }}
+          {{ getLosses }}
         </v-chip>
         &nbsp;
         <v-btn
@@ -80,6 +80,7 @@
   import { createGame, updateGame, createImage } from '../graphql/mutations';
   import { listGames, getImage, getStats } from '../graphql/queries';
   import { onUpdateImage } from '../graphql/subscriptions';
+  import { uuid } from 'vue-uuid';
 
   const PLAY = {
     AVAILABLE: -1,
@@ -124,11 +125,15 @@
         dialogShow: false,
         statusMessage: 'Nothing right now',
         freshGame: false,
-        gameStatsWins: '',
-        gameStatsLosses: '',
+        //gameStatsWins: '',
+        //gameStatsLosses: '',
         leaderBoardShow: false,
         waysToWin: '',
-        gameStatus: null
+        gameStatus: null,
+        stats: {
+          wins: -1,
+          losses: 0
+        }
       }
     },
     watch: {
@@ -150,6 +155,12 @@
     computed: {
       boardState() {
         return this.state;
+      },
+      getWins() {
+        return `${this.stats.wins} Win${this.stats.wins == 1 ? '' : 's'}`;
+      },
+      getLosses() {
+        return `${this.stats.losses} Loss${this.stats.lossses == 1 ? '' : 'es'}`;
       }
     },
     methods: {
@@ -183,10 +194,12 @@
           this.imageUpdateSubscription = null;
         }
       },
-      async saveGameState(status) {
+      async saveGameState(inputStatus) {
+        let status = typeof inputStatus !== undefined ? inputStatus : 'active';
+
         const data = {
           id: this.activeGameId,
-          status: typeof status !== undefined ? status : 'active',
+          status: status,
           state: JSON.stringify(this.state),
           availableEmotions: JSON.stringify(this.availableEmotions)
         };
@@ -205,10 +218,10 @@
               conditions
             }});
 
-        console.log('Updated game:', response);
+        console.log(`Updated game (${status}):`, response);
 
         if (['win', 'loss'].includes(status)) {
-          await this.getGameStats();
+          this.updateGameStats(status);
         } else {
           this.computeGameStatus();
           this.updateWaysToWin();
@@ -536,14 +549,17 @@
                 id: this.username
               }));
 
-        const stats = response.data.getStats;
+        this.stats = response.data.getStats;
 
-        this.gameStatsWins = `${stats.wins} Win${stats.wins == 1 ? '' : 's'}`;
-        this.gameStatsLosses = `${stats.losses} Loss${stats.losses == 1 ? '' : 'es'}`;
+        // this.gameStatsWins = `${stats.wins} Win${stats.wins == 1 ? '' : 's'}`;
+        // this.gameStatsLosses = `${stats.losses} Loss${stats.losses == 1 ? '' : 'es'}`;
 
-        if (this.freshGame && (stats.wins + stats.losses) == 0) {
+        if (this.freshGame && (this.stats.wins + this.stats.losses) == 0) {
           this.$router.push({ path: '/instructions' });
         }
+      },
+      updateGameStats(status) {
+        this.stats[status == 'win' ? 'wins' : 'losses']++;
       },
       async processTurnInfo(targetEmotion, imageFile) {
         this.turnActive = false;
@@ -551,10 +567,15 @@
 
         this.setStatusMessage('Sending your image to AWS Rekognition...');
 
+        const imageUUID = uuid.v4();
+        const fileName = `${this.username}/${imageUUID}_${imageFile.name}`;
+
+        console.log(`new fileName = ${fileName}`);
+
         try {
           const data = {
             targetEmotion,
-            fileName: imageFile.name,
+            fileName: fileName,
             imageGameId: this.activeGameId
           }
 
@@ -569,8 +590,9 @@
 
           console.log('Image id:', imageId);
 
+          // Using imageId as the s3 key.
           await Storage.put(
-            imageFile.name,
+            fileName,
             imageFile,
             {
               level: 'public',

@@ -60,16 +60,20 @@ export default {
     items: [],
     search: null
   }),
-  async created() {
-    this.items = await this.getItems();
-  },
   computed: {
     show: {
       get () {
         return this.value
       },
       set (value) {
-         this.$emit('input', value)
+        this.$emit('input', value)
+      }
+    }
+  },
+  watch: {
+    async value(newValue) {
+      if (newValue) {
+        this.items = await this.getItems();
       }
     }
   },
