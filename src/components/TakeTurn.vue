@@ -24,7 +24,16 @@
           height="370px"
           width="90%"
         >
-        <SpinningWheel :playedEmotions="playedEmotions" :disabled="emotion != ''" :key="gameId" />
+        <SpinningWheel
+          :playedEmotions="emotions"
+          :disabled="emotion != ''"
+          :key="gameId" />
+        <!-- <SpinningWheel
+          :available="availableEmotions"
+          :played="playedEmotions"
+          :disabled="emotion != ''"
+          :key="gameId"
+        /> -->
         <v-card-actions>
           <v-btn
             :disabled="emotion==''"
@@ -114,6 +123,26 @@
       console.log('TakeTurn mounted:', this.step)
     },
     computed: {
+      // availableEmotions() {
+      //   return this.emotions.filter(x => !x.selected).map( x => x.name);
+      // },
+      // playedEmotions() {
+      //   return this.emotions.filter(x => x.selected).map( x => x.name);
+      // },
+      emotions() {
+        let count = 0;
+        var getNext = () => count++;
+
+        let list = [];
+        this.playedEmotions.forEach( item => {
+          list.push({
+            id: getNext(),
+            ...item
+          });
+        });
+
+        return list;
+      },
       emotionReadable() {
         if (this.emotion == 'fear') {
           return 'fearful';

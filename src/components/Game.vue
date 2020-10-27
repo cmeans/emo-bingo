@@ -35,8 +35,8 @@
     </div>
     </div>
     <TakeTurn v-show="turnActive" :playedEmotions="availableEmotions" :gameId="activeGameId" />
-    <BingoSquare v-show="!turnActive" :boardState="boardState" />
-    <MessageDialog :message="dialogMessage" v-model="showDialog" />
+    <BingoSquare v-show="!turnActive" :boardState="boardState" :activeEmotion="targetEmotion" />
+    <MessageDialog :title="dialogTitle" :message="dialogMessage" v-model="dialogShow" />
     <v-overlay :absolute="true" v-show="processingEntry == true">
       <v-progress-circular
         indeterminate
@@ -94,7 +94,9 @@
         imageUpdateSubscription: null,
         minimumConfidenceLevel: 80.0,
         processingEntry: false,
+        dialogTitle: '',
         dialogMessage: '',
+        dialogShow: false,
         statusMessage: 'Nothing right now',
         gameStatsWins: '',
         gameStatsLosses: ''
@@ -117,17 +119,22 @@
     computed: {
       boardState() {
         return this.state;
-      },
-      showDialog: {
-        get () {
-          return this.dialogMessage != '';
-        },
-        set () {
-          this.dialogMessage = '';
-        }
       }
+      // showDialog: {
+      //   get () {
+      //     return this.dialogMessage != '';
+      //   },
+      //   set () {
+      //     this.dialogMessage = '';
+      //   }
+      // }
     },
     methods: {
+      showDialog(title, message) {
+        this.dialogTitle = title;
+        this.dialogMessage = message;
+        this.dialogShow = true;
+      },
       async init() {
         const owner = await Auth.currentAuthenticatedUser();
         this.username = owner.username;
@@ -140,7 +147,9 @@
         this.$root.$on(
           'turn-complete',
           async (targetEmotion, image) => {
-            this.processTurnInfo(targetEmotion, image);
+            this.targetEmotion = targetEmotion;
+            this.processTurnInfo(targetEmotion, image)
+              .then(() => this.targetEmotion = '');
           });
       },
       setStatusMessage(text) {
@@ -333,8 +342,9 @@
 
         switch (imageEntry.detectedEmotion) {
           case 'fail':
-            this.setStatusMessage('Some sort of failure...sorry, try again.')
-            break;
+            this.setStatusMessage('Ready...');
+            this.showDialog('Error','Some sort of failure...sorry, try again.');
+            return;
 
           case imageEntry.targetEmotion:
             console.log('emotions match:')
@@ -354,15 +364,17 @@
         if (imageEntry.detectedEmotion != 'fail') {
           const confidence = parseFloat(imageEntry.confidence).toFixed(2);
 
+          let message = `You were trying for <strong>${imageEntry.targetEmotion}</strong> with at least ${this.minimumConfidenceLevel}% confidence, `;
+
           switch (play) {
             case PLAY.HIT:
-              this.setStatusMessage(`You got it! '${imageEntry.targetEmotion}' with ${confidence}% confidence.`);
+              message += `and you got it with ${confidence}% confidence.`;
               break;
             case PLAY.MISS:
               if (imageEntry.detectedEmotion == imageEntry.targetEmotion) {
-                this.setStatusMessage(`Sorry your '${imageEntry.detectedEmotion}' selfie confidence level was too low.`);
+                message += `but the selfie confidence level was too low at only ${confidence}%.`;
               } else {
-                this.setStatusMessage(`Sorry your selfie had more '${imageEntry.detectedEmotion}' with ${confidence}% confidence.`);
+                message += `but your selfie had more <strong>${imageEntry.detectedEmotion}</strong> with a confidence level of ${confidence}%.`;
               }
               break;
           }
@@ -370,6 +382,9 @@
           this.state.filter(cell => cell.name == imageEntry.targetEmotion).forEach( cell => {
             cell.play = play;
           });
+
+          this.showDialog('Analysis Result', message);
+          this.setStatusMessage('Ready...');
 
           // Flag the emotion as no-longer-available.
           this.updateAvailableEmotions(
@@ -382,12 +397,12 @@
       logGameWin() {
         this.gameState = 'win';
         this.saveGameState('win');
-        this.dialogMessage = 'You Won!';
+        this.dialogMessage += '<br/><br/><strong>And, you Won!</strong>';
       },
       logGameLoss() {
         this.gameState = 'loss';
         this.saveGameState('loss');
-        this.dialogMessage = "Sorry, you've lost this game, there's no way left to win!";
+        this.dialogMessage += "<br/><br/><i>Sorry, you've lost this game, there's no way left to win!</i>";
       },
       checkGameStatus() {
         const WIN = '11111';

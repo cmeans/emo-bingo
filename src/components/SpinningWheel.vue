@@ -1,5 +1,4 @@
 <template>
-  <div>
   <v-card
     elevation="0"
     class="ma-4"
@@ -23,16 +22,20 @@
         <div class="prize-list">
           <div
             class="prize-item-wrapper"
-            v-for="(item,index) in prizeList"
-            :key="index"
+            v-for="(item,index) in playedEmotions"
+            :key="item.id"
           >
             <div
               class="prize-item"
-              :class="{selected: item.selected}"
               :style="`transform: rotate(${(360/ prizeList.length) * index}deg)`"
             >
               <div class="prize-name">
-                <v-chip :id="item.name">
+                <v-chip
+                  :id="item.name"
+                  :class="{
+                    'item-selected': item.selected
+                  }"
+                >
                   <curve-text
                     :r="5"
                     offset="50%"
@@ -51,35 +54,45 @@
       </div>
     </div>
   </v-card>
-  </div>
 </template>
 
 <script>
-  import CurveText from '@inotom/vue-curve-text';
-  import { emotionIcons } from '../main';
+import CurveText from '@inotom/vue-curve-text';
+import { emotionIcons } from '../main';
 
-  export default {
-    name: 'SpinningWheel',
+export default {
+  name: 'SpinningWheel',
 
-    components: {
-      CurveText
-    },
-    props:
-      [
-        'playedEmotions',
-        'disabled'
-      ],
-    data: () => ({
-      freeze: false,
-      rolling: false,
-      wheelDeg: 0,
-      prizeNumber: 8,
-      pickedItems: [],
-      emotionIcons
-    }),
+  components: {
+    CurveText
+  },
+  props:
+    [
+      'playedEmotions',
+      'disabled'
+    ],
+  data: () => ({
+    freeze: false,
+    rolling: false,
+    wheelDeg: 0,
+    prizeNumber: 8,
+    // pickedItems: [],
+    emotionIcons,
+    emotion: null
+  }),
   computed: {
+    pickedItems() {
+      var list = [];
+      this.playedEmotions.forEach( (item, index) => {
+        if (item.selected) {
+          list.push(index);
+        }
+      });
+
+      return list;
+    },
     prizeList() {
-      return this.playedEmotions; //.slice(0, this.prizeNumber);
+      return this.playedEmotions;
     },
     done() {
       return (this.pickedItems.length == this.playedEmotions.length);
@@ -98,6 +111,7 @@
         result = this.randomItem();
       }
       this.pickedItems.push(result);
+
       return result;
     },
     onClickRotate() {
@@ -105,6 +119,7 @@
         return;
       }
       const result = this.nextResult();
+
       this.roll(result);
     },
     roll(result) {
@@ -121,12 +136,15 @@
         let item = prizeList[result];
         item.selected = true;
 
-        const chip = document.getElementById(item.name);
-        chip.style.backgroundColor = 'green';
-        chip.style.color = 'white';
-        chip.style.fontWeight = 'bold';
+        // const chip = document.getElementById(item.name);
+        // chip.style.backgroundColor = 'green';
+        // chip.style.color = 'white';
+        // chip.style.fontWeight = 'bold';
 
-        this.$root.$emit('emotion', item.name);
+        this.$root.$emit(
+          'emotion',
+          item.name);
+        //this.emotion = item.name;
       }, 4500);
     }
   },
@@ -228,6 +246,11 @@
 
   .prize-icon {
   }
+
+  // .theme--light.v-chip.item-just-selected {
+  //   background: green !important;
+  //   font-weight: bold;
+  // }
 
   .theme--light.v-chip.item-selected {
     background: black;

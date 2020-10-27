@@ -6,11 +6,9 @@
     >
     <v-card>
       <v-card-title class="headline">
-        Game Over
+        {{ title }}
       </v-card-title>
-      <v-card-text>
-        {{ message }}
-      </v-card-text>
+      <v-card-text v-html="message" />
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
@@ -30,6 +28,7 @@ export default {
 
   props: {
     value: Boolean,
+    title: String,
     message: String
   },
   data: () => {
