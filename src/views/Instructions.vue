@@ -12,6 +12,11 @@
       <v-card-subtitle>
         almost, but not quite entirely unlike Bingo
       </v-card-subtitle>
+      <v-btn
+        block
+        @click="$router.push({ path: '/' }).catch(err => {})">
+        Start the Game
+      </v-btn>
       <v-card-text class="text-left">
         <v-list
           width="90%"
@@ -49,11 +54,18 @@
           </v-list-item>
         </v-list>
       </v-card-text>
+      <v-btn
+        block
+        @click="$router.push({ path: '/' }).catch(err => {})">
+        Start the Game
+      </v-btn>
     </v-card>
   </div>
 </template>
 <script>
   const instructions = [
+    "This is a single player game.",
+    "There may be time for a leader-board, but don't get your hopes up.",
     "The goal, is to get five \"cells\" in a row.",
     "The row can be horizontal, vertical or diagonal.",
     "Each cell (other than the center cell) indicates an emotion.",

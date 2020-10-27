@@ -98,6 +98,7 @@
         dialogMessage: '',
         dialogShow: false,
         statusMessage: 'Nothing right now',
+        freshGame: false,
         gameStatsWins: '',
         gameStatsLosses: ''
       }
@@ -120,14 +121,6 @@
       boardState() {
         return this.state;
       }
-      // showDialog: {
-      //   get () {
-      //     return this.dialogMessage != '';
-      //   },
-      //   set () {
-      //     this.dialogMessage = '';
-      //   }
-      // }
     },
     methods: {
       showDialog(title, message) {
@@ -140,10 +133,6 @@
         this.username = owner.username;
       },
       initGameEventListeners() {
-        // this.$root.$on('take-a-turn', () => {
-        //   this.turnActive = !this.turnActive;
-        // });
-
         this.$root.$on(
           'turn-complete',
           async (targetEmotion, image) => {
@@ -300,6 +289,7 @@
         if (foundGames.length == 0) {
           const newGameResponse = await this.createNewGame();
           this.activeGameId = newGameResponse.data.createGame.id;
+          this.freshGame = true;
         } else {
           const savedGame = foundGames[0];
 
@@ -392,12 +382,28 @@
         }
       },
       async startNewGame() {
+        this.$confetti.stop();
         await this.loadOrCreateGame();
       },
       logGameWin() {
         this.gameState = 'win';
         this.saveGameState('win');
         this.dialogMessage += '<br/><br/><strong>And, you Won!</strong>';
+        this.$confetti.start({
+          particles: [{
+            type: 'image',
+            url: '/images/jack-o-lantern.png',
+            size: 30
+          }, {
+            type: 'circle'
+          }, {
+            type: 'rect'
+          }],
+          defaultColors: [
+            'purple',
+            'orange',
+            'black'
+          ]});
       },
       logGameLoss() {
         this.gameState = 'loss';
@@ -484,6 +490,10 @@
 
         this.gameStatsWins = stats.wins == 1 ? '1 Win' : `${stats.wins} Wins`;
         this.gameStatsLosses = stats.losses == 1 ? '1 Loss' : `${stats.losses} Losses`;
+
+        if (this.freshGame && (stats.wins + stats.losses) == 0) {
+          this.$router.push({ path: '/instructions' });
+        }
       },
       async processTurnInfo(targetEmotion, imageFile) {
         this.turnActive = false;

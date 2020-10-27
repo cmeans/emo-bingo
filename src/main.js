@@ -6,7 +6,9 @@ import Amplify from 'aws-amplify';
 import config from './aws-exports';
 import VueResizeText from 'vue-resize-text';
 import router from './router';
+import VueConfetti from 'vue-confetti'
 
+Vue.use(VueConfetti);
 Vue.use(VueResizeText);
 
 Amplify.configure(config);
