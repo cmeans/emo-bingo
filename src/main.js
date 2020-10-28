@@ -10,6 +10,7 @@ import VueConfetti from 'vue-confetti'
 
 Vue.use(VueConfetti);
 Vue.use(VueResizeText);
+Vue.use(require('vue-moment'));
 
 Amplify.configure(config);
 

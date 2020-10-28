@@ -18,7 +18,7 @@
       sort-by="createdAt"
       :sort-desc=true
     >
-      <!-- <template v-slot:item.full_name="{ item }">{{item.createdAt - item.createdAt}}</template> -->
+      <template v-slot:item.full_name="{ item }">{{ ($moment(item.updatedAt) - $moment(item.createdAt)) | $moment.duration('humanize') }}</template>
     </v-data-table>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -62,10 +62,10 @@ export default {
         align: 'start',
         filterable: false,
         value: 'updatedAt',
-      },
-      {
-        text: 'Full Name',
-        value: 'full_name'
+      // },
+      // {
+      //   text: 'Full Name',
+      //   value: 'full_name'
       }
     ],
     items: [],
