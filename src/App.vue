@@ -82,6 +82,14 @@
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item>
           <v-list-item
+            @click="$router.push({ path: '/gamedata' }).catch(err => {})"
+          >
+            <v-list-item-icon>
+              <v-icon>mdi-database-clock</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Game Data</v-list-item-title>
+          </v-list-item>
+          <v-list-item
             @click="$router.push({ path: '/instructions' }).catch(err => {})"
           >
             <v-list-item-icon>
