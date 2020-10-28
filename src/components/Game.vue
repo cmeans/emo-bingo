@@ -18,7 +18,7 @@
         </v-chip>
         &nbsp;
         <v-btn
-          @click="leaderBoardShow=true"
+          @click.stop="leaderBoardShow=true"
           icon
           color="primary"
         >
@@ -32,7 +32,7 @@
         class="text-right mt-1 mr-4"
       >
         <v-btn
-          @click="startNewGame"
+          @click.stop="startNewGame"
           v-show="['win', 'loss'].indexOf(gameState) != -1"
         >
           New Game
