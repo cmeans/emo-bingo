@@ -125,13 +125,11 @@
         dialogShow: false,
         statusMessage: 'Nothing right now',
         freshGame: false,
-        //gameStatsWins: '',
-        //gameStatsLosses: '',
         leaderBoardShow: false,
         waysToWin: '',
         gameStatus: null,
         stats: {
-          wins: -1,
+          wins: 0,
           losses: 0
         }
       }
@@ -385,13 +383,17 @@
         let play = PLAY.AVAILABLE;
 
         switch (imageEntry.detectedEmotion) {
+          case 'duplicate':
+            this.setStatusMessage('Ready...');
+            this.showDialog('Error','Sorry, but it seems like we have seen this exact image before.  Please try again with a new selfie.');
+            return;
+
           case 'fail':
             this.setStatusMessage('Ready...');
-            this.showDialog('Error','Some sort of failure...sorry, try again.');
+            this.showDialog('Error','Some sort of failure...so sorry, please try again.');
             return;
 
           case imageEntry.targetEmotion:
-            console.log('emotions match:')
             if (parseFloat(imageEntry.confidence) >= this.minimumConfidenceLevel) {
               // It's a hit!
               play = PLAY.HIT;
