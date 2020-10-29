@@ -2,8 +2,6 @@
   <div class="data">
     <v-card
       class="mx-auto ma-4"
-      min-width="50%"
-      max-width="80%"
       elevation="6"
     >
       <v-card-title class="justify-center">
