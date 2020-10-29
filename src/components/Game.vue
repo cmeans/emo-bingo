@@ -131,10 +131,17 @@
         stats: {
           wins: 0,
           losses: 0
-        }
+        },
+        reloadPage: false
       }
     },
     watch: {
+      dialogShow(newValue) {
+        if (!newValue && this.reloadPage) {
+          this.reloadPage = false;
+          window.location.reload();
+        }
+      }
       /*
       async username(newUserName, oldUserName) {
         try {
@@ -374,7 +381,8 @@
       },
       handleTurnResults(imageEntry) {
         if (imageEntry == null) {
-          this.setStatusMessage('Some sort of failure...sorry, try again.');
+          this.reloadPage = true;
+          this.showDialog('Error', 'Some sort of failure...sorry, try again.');
           return;
         }
 
@@ -384,11 +392,14 @@
 
         switch (imageEntry.detectedEmotion) {
           case 'duplicate':
+            this.reloadPage = true;
             this.setStatusMessage('Ready...');
             this.showDialog('Error','Sorry, but it seems like we have seen this exact image before.  Please try again with a new selfie.');
             return;
 
           case 'fail':
+          case null:
+            this.reloadPage = true;
             this.setStatusMessage('Ready...');
             this.showDialog('Error','Some sort of failure...so sorry, please try again.');
             return;
@@ -407,35 +418,33 @@
             play = PLAY.MISS;
         }
 
-        if (imageEntry.detectedEmotion != 'fail') {
-          const confidence = parseFloat(imageEntry.confidence).toFixed(2);
+        const confidence = parseFloat(imageEntry.confidence).toFixed(2);
 
-          let message = `You were trying for <strong>${imageEntry.targetEmotion}</strong> with at least ${this.minimumConfidenceLevel}% confidence, `;
+        let message = `You were trying for <strong>${imageEntry.targetEmotion}</strong> with at least ${this.minimumConfidenceLevel}% confidence, `;
 
-          switch (play) {
-            case PLAY.HIT:
-              message += `and you got it with ${confidence}% confidence.`;
-              break;
-            case PLAY.MISS:
-              if (imageEntry.detectedEmotion == imageEntry.targetEmotion) {
-                message += `but the selfie confidence level was too low at only ${confidence}%.`;
-              } else {
-                message += `but your selfie had more <strong>${imageEntry.detectedEmotion}</strong> with a confidence level of ${confidence}%.`;
-              }
-              break;
-          }
-
-          this.state.filter(cell => cell.name == imageEntry.targetEmotion).forEach( cell => {
-            cell.play = play;
-          });
-
-          this.setStatusMessage('Ready...');
-          this.showDialog('Analysis Result', message);
-
-          // Flag the emotion as no-longer-available.
-          this.updateAvailableEmotions(
-            imageEntry.targetEmotion);
+        switch (play) {
+          case PLAY.HIT:
+            message += `and you got it with ${confidence}% confidence.`;
+            break;
+          case PLAY.MISS:
+            if (imageEntry.detectedEmotion == imageEntry.targetEmotion) {
+              message += `but the selfie confidence level was too low at only ${confidence}%.`;
+            } else {
+              message += `but your selfie had more <strong>${imageEntry.detectedEmotion}</strong> with a confidence level of ${confidence}%.`;
+            }
+            break;
         }
+
+        this.state.filter(cell => cell.name == imageEntry.targetEmotion).forEach( cell => {
+          cell.play = play;
+        });
+
+        this.setStatusMessage('Ready...');
+        this.showDialog('Analysis Result', message);
+
+        // Flag the emotion as no-longer-available.
+        this.updateAvailableEmotions(
+          imageEntry.targetEmotion);
       },
       async startNewGame() {
         this.stopGameWon();
