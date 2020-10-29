@@ -1,22 +1,23 @@
 <template>
-  <v-card>
-    <v-card-title>
-    </v-card-title>
+  <v-card
+    elevation="6"
+    width="100%"
+  >
     <v-card-actions>
+      <v-spacer></v-spacer>
       <v-btn
         text
         @click.stop="show=true"
       >
         Delete All Game Data and Images
       </v-btn>
+      <v-spacer></v-spacer>
     </v-card-actions>
     <v-data-table
-      dense
       show-expand
       mobile-breakpoint="sm"
       :headers="headers"
       :items="items"
-      :search="search"
       sort-by="createdAt"
       :sort-desc=true
       :single-expand="true"
@@ -38,9 +39,8 @@
       <template v-slot:expanded-item="{ headers }">
       <td :colspan="headers.length">
         <v-data-table
-          dense
           show-expand
-          mobile-breakpoint="sm"
+          mobile-breakpoint="md"
           :headers="imageHeaders"
           :items="gameImageItems"
           sort-by="createdAt"
@@ -52,11 +52,11 @@
             v-slot:item.image="{ item }"
           >
             <v-img
-              contained
-              :eager=true
-              class="ma-1"
-              :src="item.imageUrl"
-              style="width: 100px; height:100px"
+              contain
+              class="mx-auto ma-2"
+              :src="imageData[item.fileName]"
+              width="100px"
+              height="100px"
             >
               <template v-slot:placeholder>
                 <v-row
@@ -77,6 +77,7 @@
               :colspan="headers.length"
               class="text-left"
             >
+              <h2>All FaceDetails Returned by AWS Rekognition</h2>
               {{ item.faceDetails }}
             </td>
           </template>
@@ -84,32 +85,32 @@
       </td>
       </template>
     </v-data-table>
-  <v-dialog
-    v-model="show"
-    persistent
-    max-width="290"
-    >
-    <v-card>
-      <v-card-title class="headline">
-        Delete is
-        <br/>Not Yet Implemented
-      </v-card-title>
-      <v-card-text>
-        Regardless I expect my AWS account to be reset (wiped) EOD Friday, so you can
-        expect them to be deleted at that time.  If they are not, I will delete the
-        AWS S3 bucket manually.
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          text
-          @click.stop="show = false"
-        >
-          OK
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <v-dialog
+      v-model="show"
+      persistent
+      max-width="290"
+      >
+      <v-card>
+        <v-card-title class="headline">
+          Delete is
+          <br/>Not Yet Implemented
+        </v-card-title>
+        <v-card-text>
+          Regardless I expect my AWS account to be reset (wiped) EOD Friday, so you can
+          expect them to be deleted at that time.  If they are not, I will delete the
+          AWS S3 bucket manually.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            @click.stop="show = false"
+          >
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -125,54 +126,42 @@ export default {
   },
   data: () => ({
     show: false,
-    username: '',
     headers: [
       {
         text: 'State',
         align: 'center',
-        filterable: true,
         value: 'status'
       },
       {
         text: 'Started',
         align: 'start',
-        filterable: false,
         value: 'createdAt'
       },
       {
         text: 'Duration',
         align: 'end',
-        filterable: false,
         value: 'duration'
-      // },
-      // {
-      //   text: 'Full Name',
-      //   value: 'full_name'
-      }
-    ],
+      }],
     imageHeaders: [{
         text: 'Requested',
         align: 'start',
-        filterable: false,
         value: 'targetEmotion'
       }, {
         text: 'Detected',
         align: 'start',
-        filterable: false,
         value: 'detectedEmotion'
       }, {
-        text: 'Confidence',
+        text: 'Confidence (%)',
         align: 'end',
-        filterable: false,
         value: 'confidence'
       }, {
-        text: 'Selfie/Image',
-        filterable: false,
+        text: 'Selfie / Image',
+        align: 'center',
         value: 'image'
       }],
     items: [],
     gameImageItems: [],
-    search: null,
+    imageData: {},
     statusColors: {
       active: 'blue',
       win: 'green',
@@ -181,9 +170,7 @@ export default {
     expanded: []
   }),
   async created() {
-    //await this.init();
     this.items = await this.getGames();
-    //console.log(this.items);
   },
   watch: {
     async expanded(newList) {
@@ -214,16 +201,15 @@ export default {
 
       const items = response.data.getGame.images.items;
 
-      items.forEach (
-        async (item) => {
+      for (let i=0; i < items.length; i++) {
+        let item = items[i];
           if (item.confidence) {
             item.confidence =
               parseFloat(item.confidence).toFixed(2);
           }
-          item.imageUrl =
-            await this.getImageUrl(item.fileName)
-        }
-      );
+
+          this.imageData[item.fileName] = await this.getImageUrl(item.fileName);
+      }
 
       return items;
     },

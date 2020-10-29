@@ -1,17 +1,12 @@
 <template>
-  <div class="data">
-    <v-card
-      class="mx-auto ma-4"
-      elevation="6"
-    >
-      <v-card-title class="justify-center">
-        Game Data
-      </v-card-title>
-      <v-card-text>
-        <PastGames />
-      </v-card-text>
-    </v-card>
-  </div>
+  <v-card>
+    <v-card-title class="justify-center">
+      Game Data
+    </v-card-title>
+    <v-card-text>
+      <PastGames />
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>

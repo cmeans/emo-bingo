@@ -78,7 +78,8 @@
     "Submit the image for analysis...when we get the results back, the board will be updated.",
     "The board is updated with success or failure for your selfie to match the requested emotion with 80% or higher confidence.",
     "You'll loose the game if it's not possible to win because too many cells are lost.",
-    "The center cell is a freebie (you're welcome!)"
+    "The center cell is a freebie (you're welcome!)",
+    "To review your game data, see the Game Data page under the hamburger menu, you will be able to review each submitted image by game, and see all the data returned by AWS Rekognition for Face Detection"
   ];
 
   const underTheHood = [
