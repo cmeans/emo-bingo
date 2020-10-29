@@ -605,7 +605,7 @@
 
           this.setStatusMessage('Waiting for the results...');
 
-          var wait = async (delay) => {
+          var wait = (delay) => {
             return new Promise(resolve => setTimeout(resolve, delay))
           };
 
@@ -622,7 +622,8 @@
 
           let imageEntry =
             await checkForUpdatedImageEntry();
-          while (imageEntry.detectedEmotion == null) {
+          let count = 4;
+          while (imageEntry.detectedEmotion == null && count-- != 0) {
             await wait(5000);
 
             imageEntry =
