@@ -2,6 +2,11 @@
   <div>
     <div class="d-flex justify-center">
       <amplify-authenticator v-if="authState !== 'signedin'">
+        <amplify-sign-up
+          header-text="emo-Bingo Sign Up (Account Create)"
+          slot="sign-up"
+          :form-fields.prop="formFields"
+        ></amplify-sign-up>
         <amplify-sign-in header-text="emo-Bingo Sign In" slot="sign-in"></amplify-sign-in>
       </amplify-authenticator>
     </div>
@@ -31,6 +36,11 @@ export default {
     return {
       user: undefined,
       authState: undefined,
+      formFields: [
+        { type: "username" },
+        { type: "password" },
+        { type: "email" }
+      ]
     }
   },
   beforeDestroy() {

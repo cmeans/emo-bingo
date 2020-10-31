@@ -35,7 +35,16 @@
         {{ $moment(item.createdAt).format('ddd hh:mma') }}
       </template>
       <template v-slot:item.duration="{ item }">
-        {{ $moment.duration($moment(item.updatedAt).diff($moment(item.createdAt))).humanize() }}</template>
+        {{ $moment.duration($moment(item.updatedAt).diff($moment(item.createdAt))).humanize() }}
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          large
+          @click.stop="deleteGame(item)"
+        >
+          mdi-delete
+        </v-icon>
+      </template>
       <template v-slot:expanded-item="{ headers }">
       <td :colspan="headers.length">
         <v-data-table
@@ -91,20 +100,18 @@
       max-width="290"
       >
       <v-card>
-        <v-card-title class="headline">
-          Delete is
-          <br/>Not Yet Implemented
+        <v-card-title class="headline justify-center">
+          Deleting All<br/>Game Data<br/>and Images
         </v-card-title>
         <v-card-text>
-          Regardless I expect my AWS account to be reset (wiped) 2nd Friday of December, so you can
-          expect them to be deleted at that time.  If they are not, I will delete the
-          AWS S3 bucket manually.  You can also DM me, and I'll remove just yours specifically ASAP.
+          FYI:  Your wins & losses will not be impacted.  If you want those gone as well, please
+          <a href="https://enova.slack.com/team/UG04ESDDK">Slack</a> or <a href='#' onclick='window.open("mailto:Chris Means<cmeans@enova.com>?subject=Delete emo-bingo stats&body=Please provide your emo-bingo User Name or email address.");return false'>email</a> me directly.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             text
-            @click.stop="show = false"
+            @click.stop="deleteAll(); show=false"
           >
             OK
           </v-btn>
@@ -117,6 +124,7 @@
 <script>
 import { API, Storage, graphqlOperation } from 'aws-amplify';
 import { listGames, getGame } from '../graphql/queries';
+import { deleteGame, deleteImage } from '../graphql/mutations';
 
 export default {
   name: 'PastGames',
@@ -138,10 +146,10 @@ export default {
         value: 'createdAt'
       },
       {
-        text: 'Duration',
-        align: 'end',
-        value: 'duration'
-      }],
+        text: 'Duration', align: 'end', value: 'duration'
+      },
+      { text: 'Actions', value: 'actions', sortable: false }
+    ],
     imageHeaders: [{
         text: 'Requested',
         align: 'start',
@@ -215,6 +223,67 @@ export default {
     },
     async getImageUrl(fileName) {
       return await Storage.get(fileName);
+    },
+    async deleteAll() {
+      // Iterate through items.
+      console.log("Deleting all games...")
+      this.items.forEach(
+        async (game) => {
+          await this.deleteGame(game);
+        });
+
+      this.items = [];
+    },
+    async deleteGame(game) {
+      const response =
+        await API.graphql(
+          graphqlOperation(
+            getGame,
+            {
+              id: game.id
+            }));
+
+      const gameImages =
+        response.data.getGame.images.items;
+
+      gameImages.forEach(
+        async (image) => {
+          await this.deleteGameImage(image.id);
+        });
+
+      // Delete game record.
+      console.log('Game entry delete:')
+      await API.graphql(
+        graphqlOperation(
+          deleteGame,
+          {
+            input: { id: game.id }
+          }))
+        .then ( (result) => {
+          console.log(result);
+        })
+        .catch( (err) => {
+          console.log(err);
+        });
+
+      const index = this.items.indexOf(game);
+      this.items.splice(index, 1)
+    },
+    async deleteGameImage(id) {
+      // Delete image record (delete trigger Lambda will take care of S3 object).
+      console.log('Image reference & data delete:')
+      await API.graphql(
+        graphqlOperation(
+          deleteImage,
+          {
+              input: { id }
+          }))
+        .then ( (result) => {
+          console.log(result);
+        })
+        .catch( (err) => {
+          console.log(err);
+        });
     },
     getColor(status) {
       return this.statusColors[status];

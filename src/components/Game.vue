@@ -579,7 +579,7 @@
         this.setStatusMessage('Sending your image to AWS Rekognition...');
 
         const imageUUID = uuid.v4();
-        const fileName = `${this.username}/${imageUUID}_${imageFile.name}`.replaceAll(' ', '_');
+        const fileName = encodeURI(`${this.username}/${imageUUID}_${imageFile.name}`);
 
         console.log(`new fileName = ${fileName}`);
 
