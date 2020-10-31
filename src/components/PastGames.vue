@@ -96,9 +96,9 @@
           <br/>Not Yet Implemented
         </v-card-title>
         <v-card-text>
-          Regardless I expect my AWS account to be reset (wiped) EOD Friday, so you can
+          Regardless I expect my AWS account to be reset (wiped) 2nd Friday of December, so you can
           expect them to be deleted at that time.  If they are not, I will delete the
-          AWS S3 bucket manually.
+          AWS S3 bucket manually.  You can also DM me, and I'll remove just yours specifically ASAP.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>

@@ -78,18 +78,18 @@ exports.handler = async (event, context) => {
     const bucket = record.s3.bucket.name; //eslint-disable-line
     const key = record.s3.object.key; //eslint-disable-line
     const metadata = await getMetadata(bucket, key);
-    const etag = record.s3.object.eTag;
+    const imageKey = record.s3.object.eTag + record.s3.object.size;
     const datetime = new Date().toISOString();
 
     const hashTableParams = {
       TableName: "image-hashes",
       Item: {
-        id: etag,
+        id: imageKey,
         createdAt: datetime
       },
       ConditionExpression: "id <> :id",
       ExpressionAttributeValues: {
-        ":id" : etag
+        ":id" : imageKey
       }
     };
 
