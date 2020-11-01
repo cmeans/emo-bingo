@@ -186,19 +186,24 @@
       initGameEventListeners() {
         this.$root.$on(
           'turn-complete',
-          async (targetEmotion, image) => {
-            this.targetEmotion = targetEmotion;
-
-            await this.processTurnInfo(targetEmotion, image)
-              .then(() => this.targetEmotion = '');
-          });
+          this.setTurnEntry);
       },
       uninitGameEventListeners() {
         this.$root.$off(
-          'turn-complete');
+          'turn-complete',
+          this.setTurnEntry);
       },
       setStatusMessage(text) {
         this.$root.$emit('status-message', text);
+      },
+      async setTurnEntry(targetEmotion, image) {
+        this.targetEmotion = targetEmotion;
+
+        await this.processTurnInfo(targetEmotion, image)
+          .then(() => {
+            console.log('Clearing targetEmotion');
+            this.targetEmotion = '';
+          });
       },
       stopImageUpdateSubscription() {
         console.log(`Unsubscribing from Image updates for: ${this.username}`);
