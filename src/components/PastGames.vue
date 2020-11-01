@@ -32,7 +32,7 @@
         </v-chip>
       </template>
       <template v-slot:item.createdAt="{ item }">
-        {{ $moment(item.createdAt).format('ddd hh:mma') }}
+        {{ $moment(item.createdAt).format('ddd Do hh:mma') }}
       </template>
       <template v-slot:item.duration="{ item }">
         {{ $moment.duration($moment(item.updatedAt).diff($moment(item.createdAt))).humanize() }}
