@@ -111,6 +111,12 @@
           <v-spacer></v-spacer>
           <v-btn
             text
+            @click.stop="show=false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            text
             @click.stop="deleteAll(); show=false"
           >
             OK
