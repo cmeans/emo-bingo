@@ -88,6 +88,10 @@
     HIT: 1
   };
 
+  // https://stackoverflow.com/questions/7116450/what-are-valid-s3-key-names-that-can-be-accessed-via-the-s3-rest-api
+  // Not handling...Non-printable ASCII characters (128–255 decimal characters).
+  const awsS3FileNameAvoidChars = "^`><{}][%~|'\"\\#";
+
   export default {
     name: 'Game',
 
@@ -101,10 +105,11 @@
       this.init();
 
       this.initGameEventListeners();
-      await this.loadOrCreateGame()
-        .then(() => console.log('loadOrCreated') );
+      await this.loadOrCreateGame();
     },
-    destroyed() {
+    beforeDestroy() {
+      this.uninitGameEventListeners();
+
       this.stopGameWon();
       this.stopImageUpdateSubscription();
     },
@@ -165,7 +170,7 @@
         return `${this.stats.wins} Win${this.stats.wins == 1 ? '' : 's'}`;
       },
       getLosses() {
-        return `${this.stats.losses} Loss${this.stats.lossses == 1 ? '' : 'es'}`;
+        return `${this.stats.losses} Loss${this.stats.losses == 1 ? '' : 'es'}`;
       }
     },
     methods: {
@@ -187,6 +192,10 @@
             await this.processTurnInfo(targetEmotion, image)
               .then(() => this.targetEmotion = '');
           });
+      },
+      uninitGameEventListeners() {
+        this.$root.$off(
+          'turn-complete');
       },
       setStatusMessage(text) {
         this.$root.$emit('status-message', text);
@@ -572,6 +581,10 @@
       updateGameStats(status) {
         this.stats[status == 'win' ? 'wins' : 'losses']++;
       },
+      getSafeS3FileName(name) {
+        // Special handling for ' ', and #.
+        return encodeURI(name.replaceAll(' ','_')).split(awsS3FileNameAvoidChars).join('_').replaceAll('#', '-');
+      },
       async processTurnInfo(targetEmotion, imageFile) {
         this.turnActive = false;
         this.processingEntry = true;
@@ -579,7 +592,7 @@
         this.setStatusMessage('Sending your image to AWS Rekognition...');
 
         const imageUUID = uuid.v4();
-        const fileName = encodeURI(`${this.username}/${imageUUID}_${imageFile.name}`);
+        const fileName = this.getSafeS3FileName(`${this.username}/${imageUUID}_${imageFile.name}`);
 
         console.log(`new fileName = ${fileName}`);
 

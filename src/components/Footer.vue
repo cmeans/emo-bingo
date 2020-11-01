@@ -38,10 +38,20 @@
     data: () => ({
       message: ''
     }),
-    created() {
-      this.$root.$on('status-message', text => {
+    mounted() {
+      this.$root.$on(
+        'status-message',
+        this.setMessage);
+    },
+    beforeDestroy() {
+      this.$root.$off(
+        'status-message',
+        this.setMessage);
+    },
+    methods: {
+      setMessage(text) {
         this.message = text;
-      });
+      }
     }
   }
 </script>

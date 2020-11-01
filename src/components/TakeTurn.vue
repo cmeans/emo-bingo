@@ -119,12 +119,17 @@
     ],
     data: () => getDefaultData(),
     mounted() {
-      this.$root.$on('emotion', (text) => {
-        this.emotion = text;
-      });
+      this.$root.$on(
+        'emotion',
+        this.setEmotion);
 
       this.step = 1;
       console.log('TakeTurn mounted:', this.step)
+    },
+    beforeDestroy() {
+      this.$root.$off(
+        'emotion',
+        this.setEmotion);
     },
     computed: {
       // availableEmotions() {
@@ -159,6 +164,9 @@
       }
     },
     methods: {
+      setEmotion(text) {
+        this.emotion = text;
+      },
       doPreviewImage(file) {
         if (this.previewImage) {
           URL.revokeObjectURL(this.previewImage) // free memory
